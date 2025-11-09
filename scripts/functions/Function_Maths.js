@@ -409,9 +409,11 @@ function min()
 function min3(_a,_b,_c){ return min(_a,_b,_c); }
 
 
-var state = []; 					// initialize state to random bits
+// var state = []; 					// initialize state to random bits
+var state = new Array(16); 					// initialize state to random bits
 var g_RndIndex = 0;						// reset anyway
 var g_nRandSeed = InitRandom(0);	// init should also reset this to 0
+var g_nRandSeed = 0;	// Calling function before it's defined crashes AthenaEnv on load, moving call to after
 var g_nRandomPoly = 0xDA442D24;
 
 
@@ -424,16 +426,39 @@ var g_nRandomPoly = 0xDA442D24;
 ///				0 (for global initialisation)
 ///			</returns>
 // #############################################################################################
+// function InitRandom( _seed ) {
+
+//     var s = _seed;
+// 	for (var i = 0; i < 16; i++)
+//     {
+//       s = (((s * 214013 + 2531011) >> 16) & 0x7fffffff) | 0;
+//       debug("s ", s)
+//       state[i] = ~ ~s; //i ;
+//     }
+//     g_RndIndex = 0;
+//     g_nRandSeed = _seed;
+//     return g_nRandSeed;
+// }
+
+// TODO: Use original LCG random function if possible, probably overflowing 32bit 
 function InitRandom( _seed ) {
-	var s = _seed;
-	for (var i = 0; i < 16; i++)
-	{
-		s = (((s * 214013 + 2531011) >> 16) & 0x7fffffff) | 0;
-		state[i] = ~ ~s; //i ;
-	}
-	g_RndIndex = 0;
-	g_nRandSeed = _seed;
-	return g_nRandSeed;
+  var s = LCG(_seed);
+
+  for (var i = 0; i < 16; i++)
+  {
+    state[i] = ~ ~s(); //i ;
+  }
+  g_RndIndex = 0;
+  g_nRandSeed = _seed;
+  return g_nRandSeed;
+}
+
+// Trying out an LCG function I found online
+function LCG(a) {
+  return function () {
+    a = Math.imul(48271, a) | 0 % 2147483647
+    return (a & 2147483647) / 2147483648
+  }
 }
 
 

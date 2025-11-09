@@ -741,22 +741,30 @@ yyRoom.prototype.GML_AddInstanceDepth = function (_x, _y,_depth, _objid) {
 // #############################################################################################
 yyRoom.prototype.CreateInstance = function (_x, _y, _id, _objindex, _scaleX, _scaleY, _imageSpeed, _imageIndex, _rotation,_colour)
 {
+	debug("in CreateInstance ")
     
     var pinst = new yyInstance(_x, _y, _id, _objindex, true);
     this.m_Active.Add(pinst);
     g_pInstanceManager.Add(pinst);
-
+		debug("Instance created and added to the instance manager")
 
 	if (_imageSpeed != undefined) pinst.image_speed = _imageSpeed;
-	if (_imageIndex != undefined) pinst.image_index = _imageIndex;	    	
+	debug("past _imageSpeed")
+	// TODO: Why does this line crash??? Boths vars are 0, should be no problem. The rest work???
+	// if (_imageIndex != undefined) pinst.image_index = _imageIndex;	    	
+	debug("past _imageIndex")
     if (_scaleX != undefined) pinst.image_xscale = _scaleX;
+		debug("past _scaleX")
     if (_scaleY != undefined) pinst.image_yscale = _scaleY;
+		debug("past _scaleY")
     if (_rotation != undefined) pinst.image_angle = _rotation;
+		debug("past _rotation")
     if (_colour != undefined) {
+			debug("past _colour")
         pinst.image_blend = _colour & 0xffffff;
         pinst.image_alpha = ((_colour >> 24) & 0xff) / 255.0;
     }
-
+	debug("Past image properties")
     if (g_isZeus)
     {
         pinst.sequence_pos = pinst.last_sequence_pos = pinst.image_index;
@@ -773,8 +781,10 @@ yyRoom.prototype.CreateInstance = function (_x, _y, _id, _objindex, _scaleX, _sc
             g_pLayerManager.BuildElementRuntimeData(this, elandlay.layer, elandlay.element);
         }
     }
+	debug("Past g_isZeus")
 	// @if feature("physics")
     pinst.BuildPhysicsBody();
+	debug("Past pinst.BuildPhysicsBody")
 	// @endif
     
   //  g_pLayerManager.AddInstance(this,pinst);
@@ -4619,6 +4629,7 @@ yyRoom.prototype.RemoveSeqInstance = function (_id) {
 /**@constructor*/
 function    yyRoomManager()
 {
+		debug("In yyRoomManager constructor")
     this.pRooms = []; //new yyList();
     this.m_RoomOrder = [];
 }

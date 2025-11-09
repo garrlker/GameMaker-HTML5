@@ -1379,6 +1379,7 @@ yyObject.prototype.PerformInstanceEvent = function (_event, _index, _is_async) {
 // #############################################################################################
 /**@constructor*/
 function yyObjectManager() {
+	debug("In yyObjectManager constructor")
 	this.objnamelist = [];
 	this.objidlist = [];
 	this.length = 0;

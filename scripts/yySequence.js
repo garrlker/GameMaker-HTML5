@@ -4307,6 +4307,7 @@ yySequence.prototype.GetObjectIDsFromTrack = function(_tracks, _ids) {
 // #############################################################################################
 /** @constructor */
 function yySequenceManager() {
+    debug("In yySequenceManager constructor")
     this.Sequences = [];
     this.Instances = [];
 
@@ -4321,6 +4322,7 @@ function yySequenceManager() {
     this.TEXTEFFECT_TRACK_MASK.SetBit(eT_TextEffect_ShadowSoftness);
     this.TEXTEFFECT_TRACK_MASK.SetBit(eT_TextEffect_ShadowOffset);
     this.TEXTEFFECT_TRACK_MASK.SetBit(eT_TextEffect_ShadowColour);
+    debug("Past yySequenceManager constructor")
 }
 
 // #############################################################################################

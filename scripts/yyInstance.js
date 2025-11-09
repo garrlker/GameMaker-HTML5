@@ -3318,6 +3318,7 @@ yyInstance.prototype.GetCollisionDomain = function()
 /**@constructor*/
 function yyInstanceManager() 
 {
+	debug("In yyInstanceManager constructor")
 	this.m_Instances = new yyList();
 	this.m_Instances.packing = true;
 	this.m_ID2Instance = [];
@@ -3458,15 +3459,14 @@ yyInstanceManager.prototype.Remove = function (_pInst) {
 yyInstanceManager.prototype.RememberOldPositions = function () {
 	var pool = g_RunRoom.m_Active.pool;
 	var room = g_pLayerManager.GetTargetRoomObj();
-	
 	for (var index = 0; index < pool.length; index++)
 	{
 		var pInst = pool[index];
 		pInst.xprevious = pInst.x;
 		pInst.yprevious = pInst.y;
 		pInst.path_positionprevious = pInst.path_position;
-		
-		pInst.Animate();
+		// TODO: This animate call is crashing the engine loop, fix later
+		// pInst.Animate();
 		
 	}
 };

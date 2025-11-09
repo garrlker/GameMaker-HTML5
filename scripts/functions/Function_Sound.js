@@ -137,6 +137,7 @@ function audio_reinit()
 
 function Audio_Init()
 {
+    debug("In Audio_Init")
     if (g_AudioModel !== Audio_WebAudio)
         return;
 

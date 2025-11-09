@@ -13,6 +13,7 @@
 /** @constructor */
 function TagManager()
 {
+    debug("In TagManager constructor")
     this.m_tagList = [];    //array of unique tag strings
     this.m_tagMap = {};     //map of tagString : tagIndex
     this.m_tagIdMap = {};   //map of assetTypeId: array of tag index
@@ -26,6 +27,7 @@ function MakeTypeId(_assetType, _assetId)
 
 TagManager.prototype.LoadTags = function( _tagList, _tagIds )
 {
+    debug("LoadTags", _tagList, _tagIds)
     this.m_tagList = _tagList.slice();
     for( var i=0; i < _tagList.length; ++i )
         this.m_tagMap[ _tagList[i] ] = i;

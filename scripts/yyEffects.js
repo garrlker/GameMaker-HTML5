@@ -1129,6 +1129,7 @@ function yyTempSurface()
 /** @constructor */
 function yyEffectsManager()
 {
+	debug("In yyEffectsManager constructor")
 	this.__type = "[EffectManager]";
 	this.m_EffectInfo = {};
 	this.m_frameID = 0;

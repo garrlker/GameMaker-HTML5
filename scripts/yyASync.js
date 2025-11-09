@@ -277,6 +277,7 @@ function ASync_ImageLoad_Error_Callback(_event)
 // #############################################################################################
 /** @constructor */
 function yyASyncManager() {
+	debug("In yyASyncManager constructor")
 	this.queue = [];
 	this.queueLength = 0;
 }

@@ -816,6 +816,7 @@ yyPath.prototype.AddPoint = function (_xx, _yy, _ss) {
 /**@constructor*/
 function yyPathManager() 
 {
+	debug("In yyPathManager constructor")
 	this.Paths = [];
 	g_Path_MasterID = 0;
 }

@@ -72,44 +72,44 @@ var g_60_fps_counter = 0;
 var g_Master_60_fps_counter = 0;
 
 // Chrome store package?
-if (window.chrome && window.chrome.app) { 
-    g_ChromeStore = true;
-    try {
-        if( window && window['localStorage'] ){
-            g_ChromeStore = false;
-        }
-    } catch (e) {
-    }
-}
+// if (window.chrome && window.chrome.app) { 
+//     g_ChromeStore = true;
+//     try {
+//         if( window && window['localStorage'] ){
+//             g_ChromeStore = false;
+//         }
+//     } catch (e) {
+//     }
+// }
 
 
 
-window.addEventListener(
-	"message",
-(event) => {
+// window.addEventListener(
+// 	"message",
+// (event) => {
 
-	  //console.log("Event received from " + event.origin);
-	  //console.log("Event data " + event.data);
-      const map = ds_map_create();
-      g_pBuiltIn.async_load = map;
+// 	  //console.log("Event received from " + event.origin);
+// 	  //console.log("Event data " + event.data);
+//       const map = ds_map_create();
+//       g_pBuiltIn.async_load = map;
   
-      ds_map_add(map, "origin", event.origin);
-      ds_map_add(map, "event_type", "post_message_received");
-      if (typeof event.data === 'string' || event.data instanceof String)
-      {
-        ds_map_add(map, "data", event.data);
-      }
-      else
-      {
-        ds_map_add(map, "data", JSON.stringify(event.data));
-      }
-      g_pObjectManager.ThrowEvent(EVENT_OTHER_SYSTEM_EVENT, 0);
+//       ds_map_add(map, "origin", event.origin);
+//       ds_map_add(map, "event_type", "post_message_received");
+//       if (typeof event.data === 'string' || event.data instanceof String)
+//       {
+//         ds_map_add(map, "data", event.data);
+//       }
+//       else
+//       {
+//         ds_map_add(map, "data", JSON.stringify(event.data));
+//       }
+//       g_pObjectManager.ThrowEvent(EVENT_OTHER_SYSTEM_EVENT, 0);
   
-      ds_map_destroy(map);
+//       ds_map_destroy(map);
 
-	}
+// 	}
 
-  );
+//   );
 
 
 
@@ -121,24 +121,26 @@ if(Number.isNaN === undefined)
 }
 
 // On load now help in the index.html file so sites can more easily add their own APIs
-//window.onload = GameMaker_Init;
+// window.onload = GameMaker_Init;
 
 window.yyRequestAnimationFrame = 
     window.requestAnimationFrame       || 
     window.webkitRequestAnimationFrame || 
     window.mozRequestAnimationFrame    || 
     window.oRequestAnimationFrame      || 
-    window.msRequestAnimationFrame;
+    window.msRequestAnimationFrame     ||
+    os.setInterval;
 
 if (!window.yyRequestAnimationFrame) {
     // if RAF is somehow amiss but we need short timeouts, register a message handler
     // https://dbaron.org/log/20100309-faster-timeouts
-    window.addEventListener("message", function(e) {
-        if (e.source == window && e.data == "yyRequestAnimationFrame") {
-            e.stopPropagation();
-            animate();
-        }
-    }, true);
+    console.log("!window.yyRequestAnimationFrame - Shouldn't hit this");
+    // window.addEventListener("message", function(e) {
+    //     if (e.source == window && e.data == "yyRequestAnimationFrame") {
+    //         e.stopPropagation();
+    //         animate();
+    //     }
+    // }, true);
 }
 // shim layer with setTimeout fallback
 window.requestAnimFrame = (function(){
@@ -261,19 +263,31 @@ function yyUnhandledRejectionHandler( error )
 window.addEventListener( "error", yyUnhandledExceptionHandler );
 window.addEventListener( "unhandledrejection", yyUnhandledRejectionHandler );
 
-
 //external access for js extensions
 // @if feature("extension_api")
+// var GMS_API = {
+//     "debug_msg": show_debug_message,
+//     "ds_list_size": ds_list_size,
+//     "ds_list_find_value": ds_list_find_value,
+//     "json_encode": json_encode,
+//     "json_decode": json_decode,
+//     "extension_get_option_value": extension_get_option_value,
+//     "send_async_event_social": YYSendAsyncEvent_Social,
+//     "get_facebook_app_id": YYGetFacebookAppId,
+// 	"get_app_version_string": YYGetAppVersionString
+// };
+// Doubtful that we'll support most extensions, but it's a maybe
+// TODO: Research extension support
 var GMS_API = {
-    "debug_msg": show_debug_message,
-    "ds_list_size": ds_list_size,
-    "ds_list_find_value": ds_list_find_value,
-    "json_encode": json_encode,
-    "json_decode": json_decode,
-    "extension_get_option_value": extension_get_option_value,
-    "send_async_event_social": YYSendAsyncEvent_Social,
-    "get_facebook_app_id": YYGetFacebookAppId,
-	"get_app_version_string": YYGetAppVersionString
+    "debug_msg": () => { console.log("GMS_API Call - debug_msg")} ,
+    "ds_list_size": () => { console.log("GMS_API Call - ds_list_size")} ,
+    "ds_list_find_value": () => { console.log("GMS_API Call - ds_list_find_value")} ,
+    "json_encode": () => { console.log("GMS_API Call - json_encode")} ,
+    "json_decode": () => { console.log("GMS_API Call - json_decode")} ,
+    "extension_get_option_value": () => { console.log("GMS_API Call - extension_get_option_value")} ,
+    "send_async_event_social": () => { console.log("GMS_API Call - send_async_event_social")} ,
+    "get_facebook_app_id": () => { console.log("GMS_API Call - get_facebook_app_id")} ,
+    "get_app_version_string": () => { console.log("GMS_API Call - get_app_version_string")} 
 };
 // @endif
 
@@ -303,7 +317,7 @@ function YYSendAsyncEvent_Social(_mapobj) {
 }
 //-------------------------------
 
-
+// TODO: With our limited RAM and flaky network support, we'll probably be best to strip out all of the builtin debug. Needs more looking into
 var g_debug_window = null;
 // #############################################################################################
 /// Function:<summary>
@@ -318,7 +332,9 @@ function ClearConsoleCallback()
 {
 	if (g_debug_window)
 	{
-		g_debug_window.document.getElementById("debug_console").value = "";
+        // TODO: IF we're able to support debug, reimpl with custom solution vs dom calls
+        // No document calls
+		// g_debug_window.document.getElementById("debug_console").value = "";
 	}
 }
 
@@ -354,64 +370,65 @@ function ToggleDebugPause() {
 ///			 </returns>
 // #############################################################################################
 // @if feature("debug")
+// TODO: Ignore debug console for now
 function CreateDebugConsole() {
 
-    try
-    {
-        g_debug_window = window.open('', 'gamemakerstudio_debugconsole_window', 'width=990,height=600,titlebar=yes,scrollbars,resizable'); //bletoolbar=no,menubar=no'); //,scrollbars,resizable,toolbar,status');
-	    // Did it open?
-	    if (g_debug_window)
-	    {
-	    	// Is the debug_console already there from a previous run?
-	    	if (!g_debug_window.document.getElementById("debug_console"))
-	    	{
-	    		//with (g_debug_window.document)
-	    		{
-	    		    g_debug_window.document.write('<!DOCTYPE html><html>' +
-                    '<header>'+
-	                    '<title>GameMaker - DEBUG console</title>'+
-                    '</header>'+
-                    '<body>'+
-	                    '<table border="0"><tr>' +
-	                        '<td>Debug Output</td><td>Instances</td><td>InstanceData</td></tr>'+
-	    		                '<tr><td><textarea id="debug_console" wrap="off" style="width: 450px; height:500px;  display: block;" cols="70"></textarea></td>' +
-	    		                '<td>'+
-	    			                '<select id="debug_instances" size=31 style="width: 120px; height: 500px; font-family: monospace;" > ' +
-	    			                  /*'<option value="CA" >California</option>'+
-	    			                  '<option value="CO" >Colorado</option>'+
-	    			                  '<option value="CN" >Connecticut</option>'+*/
-	    			                '</select>'+
-	    		                '</td>'+
-	    		                '<td ALIGN="left" VALIGN="top" style="min-width:350px; width:300px; height:500px; font-family: monospace; border:solid 1px #666"><div id="debug_Instance_Data"  style="width:100%; height:500px;overflow: auto;"></div></td>' +
-	    	                '</tr></table>' +
-	                    '<br><button type="button" id="clear_console_button" onclick="ClearConsoleCallback()">Clear Console</button>' +
-	                    '<button type="button" id="gm_pause_button" onclick="ToggleDebugPause()">Pause/Resume</button>' +
-                    '</body>' +
-                    '</html>');				
+//     try
+//     {
+//         g_debug_window = window.open('', 'gamemakerstudio_debugconsole_window', 'width=990,height=600,titlebar=yes,scrollbars,resizable'); //bletoolbar=no,menubar=no'); //,scrollbars,resizable,toolbar,status');
+// 	    // Did it open?
+// 	    if (g_debug_window)
+// 	    {
+// 	    	// Is the debug_console already there from a previous run?
+// 	    	if (!g_debug_window.document.getElementById("debug_console"))
+// 	    	{
+// 	    		//with (g_debug_window.document)
+// 	    		{
+// 	    		    g_debug_window.document.write('<!DOCTYPE html><html>' +
+//                     '<header>'+
+// 	                    '<title>GameMaker - DEBUG console</title>'+
+//                     '</header>'+
+//                     '<body>'+
+// 	                    '<table border="0"><tr>' +
+// 	                        '<td>Debug Output</td><td>Instances</td><td>InstanceData</td></tr>'+
+// 	    		                '<tr><td><textarea id="debug_console" wrap="off" style="width: 450px; height:500px;  display: block;" cols="70"></textarea></td>' +
+// 	    		                '<td>'+
+// 	    			                '<select id="debug_instances" size=31 style="width: 120px; height: 500px; font-family: monospace;" > ' +
+// 	    			                  /*'<option value="CA" >California</option>'+
+// 	    			                  '<option value="CO" >Colorado</option>'+
+// 	    			                  '<option value="CN" >Connecticut</option>'+*/
+// 	    			                '</select>'+
+// 	    		                '</td>'+
+// 	    		                '<td ALIGN="left" VALIGN="top" style="min-width:350px; width:300px; height:500px; font-family: monospace; border:solid 1px #666"><div id="debug_Instance_Data"  style="width:100%; height:500px;overflow: auto;"></div></td>' +
+// 	    	                '</tr></table>' +
+// 	                    '<br><button type="button" id="clear_console_button" onclick="ClearConsoleCallback()">Clear Console</button>' +
+// 	                    '<button type="button" id="gm_pause_button" onclick="ToggleDebugPause()">Pause/Resume</button>' +
+//                     '</body>' +
+//                     '</html>');				
 
-	    		}
-	    		var but = g_debug_window.document.getElementById("clear_console_button");
-	    		but.onclick = function() { ClearConsoleCallback(); };
-	    		but = g_debug_window.document.getElementById("gm_pause_button");
-	    		but.onclick = function() { ToggleDebugPause(); };
-}	    	
-	    }
-//	    		                '<td>Instance Data<br><textarea id="debug_Instance_Data" style="display: block;" rows="31" cols="25" style="font-family: san-serif;"></textarea></td>'+
-	    // Create a debug console.
-	    /*    var c = document.getElementById(g_CanvasName);
-	    var y = document.createElement('textarea');
-	    y.setAttribute("id","debug_console");
-	    y.setAttribute("cols","100");
-	    y.setAttribute("rows","20");
-	    y.style.display = "none";
-	    var obj = c.parentNode;
-	    obj.insertBefore(y, c.nextSibling);
-	    */
-        g_GameMakerIdentifier = 0x71562;
-    }
-    catch (e) {
-        debug(e.message);
-    }
+// 	    		}
+// 	    		var but = g_debug_window.document.getElementById("clear_console_button");
+// 	    		but.onclick = function() { ClearConsoleCallback(); };
+// 	    		but = g_debug_window.document.getElementById("gm_pause_button");
+// 	    		but.onclick = function() { ToggleDebugPause(); };
+// }	    	
+// 	    }
+// //	    		                '<td>Instance Data<br><textarea id="debug_Instance_Data" style="display: block;" rows="31" cols="25" style="font-family: san-serif;"></textarea></td>'+
+// 	    // Create a debug console.
+// 	    /*    var c = document.getElementById(g_CanvasName);
+// 	    var y = document.createElement('textarea');
+// 	    y.setAttribute("id","debug_console");
+// 	    y.setAttribute("cols","100");
+// 	    y.setAttribute("rows","20");
+// 	    y.style.display = "none";
+// 	    var obj = c.parentNode;
+// 	    obj.insertBefore(y, c.nextSibling);
+// 	    */
+//         g_GameMakerIdentifier = 0x71562;
+//     }
+//     catch (e) {
+//         debug(e.message);
+//     }
 }
 // @endif
 
@@ -429,25 +446,27 @@ function CreateDebugConsole() {
 // #############################################################################################
 function CreateLoadingCanvas()
 {
-    var c = document.getElementById(g_CanvasName);
-    var obj = c.parentNode;
+    debug("In CreateLoadingCanvas")
 
-    // Create a loading screen canvas the same size and shape of the primary one, and place it over the top of the MAIN screen.
-    var load = document.createElement('canvas');
+    // var c = document.getElementById(g_CanvasName);
+    // var obj = c.parentNode;
 
-    // position where the game canvas is - will update every frame to adjust for centering
-    CalcCanvasLocation(canvas, g_CanvasRect);
-    load.style.position = "absolute";
-    load.style.left = g_CanvasRect.left + "px";
-    load.style.top = g_CanvasRect.top + "px";
+    // // Create a loading screen canvas the same size and shape of the primary one, and place it over the top of the MAIN screen.
+    // var load = document.createElement('canvas');
+
+    // // position where the game canvas is - will update every frame to adjust for centering
+    // CalcCanvasLocation(canvas, g_CanvasRect);
+    // load.style.position = "absolute";
+    // load.style.left = g_CanvasRect.left + "px";
+    // load.style.top = g_CanvasRect.top + "px";
 
 
-    load.width = c.width;   
-    load.height = c.height; 
-    load.setAttribute("id","loading_screen");
-    obj.insertBefore(load, c.nextSibling);
-    g_LoadGraphics = load.getContext('2d');
-    Graphics_AddCanvasFunctions(g_LoadGraphics);
+    // load.width = c.width;   
+    // load.height = c.height; 
+    // load.setAttribute("id","loading_screen");
+    // obj.insertBefore(load, c.nextSibling);
+    // g_LoadGraphics = load.getContext('2d');
+    // Graphics_AddCanvasFunctions(g_LoadGraphics);
 }
 
 // #############################################################################################
@@ -477,15 +496,16 @@ function DecodeString(_str)
 // #############################################################################################
 function DeleteLoadingCanvas()
 {    
-    var c = document.getElementById(g_CanvasName);
-    var l = document.getElementById("loading_screen");
-    //BETA
-    var obj = c.parentNode;
-    if (l != null)
-    {
-        obj.removeChild(l);
-    }
-    g_LoadGraphics = null;
+    debug("In DeleteLoadingCanvas")
+    // var c = document.getElementById(g_CanvasName);
+    // var l = document.getElementById("loading_screen");
+    // //BETA
+    // var obj = c.parentNode;
+    // if (l != null)
+    // {
+    //     obj.removeChild(l);
+    // }
+    // g_LoadGraphics = null;
     g_LoadingCanvasCreated = false;
 }
 
@@ -581,18 +601,27 @@ function ParseURL(_url) {
 }
 
 function RememberCanvasSettings() {
-	g_Canvas_OriginalPosition = canvas.style.position;
-	g_Canvas_OriginalLeft = canvas.style.left;
-	g_Canvas_OriginalTop = canvas.style.top;
-	g_Canvas_Style = canvas.style.cssText;
-	g_Canvas_Original_Parent = canvas.parentNode;
-	g_Canvas_Original_Next = canvas.nextSibling;
-	g_Canvas_InRoot = false;
-	g_Canvas_Original_Margin = canvas.margin;
-	if( (g_Canvas_Original_Parent == document.body) || (canvas.mozRequestFullScreen) || (canvas.webkitRequestFullScreen))
-	{
-		g_Canvas_InRoot = true;
-	}
+    // Not in a web browser, let's hardcode these
+    g_Canvas_OriginalPosition = "fixed";
+	g_Canvas_OriginalLeft = 0;
+	g_Canvas_OriginalTop = 0;
+	g_Canvas_Style = "";
+	g_Canvas_Original_Parent = null;
+	g_Canvas_Original_Next = null;
+	g_Canvas_InRoot = true;
+	g_Canvas_Original_Margin = 0;
+	// g_Canvas_OriginalPosition = canvas.style.position;
+	// g_Canvas_OriginalLeft = canvas.style.left;
+	// g_Canvas_OriginalTop = canvas.style.top;
+	// g_Canvas_Style = canvas.style.cssText;
+	// g_Canvas_Original_Parent = canvas.parentNode;
+	// g_Canvas_Original_Next = canvas.nextSibling;
+	// g_Canvas_InRoot = false;
+	// g_Canvas_Original_Margin = canvas.margin;
+	// if( (g_Canvas_Original_Parent == document.body) || (canvas.mozRequestFullScreen) || (canvas.webkitRequestFullScreen))
+	// {
+	// 	g_Canvas_InRoot = true;
+	// }
 
 }
 
@@ -607,24 +636,51 @@ function RememberCanvasSettings() {
 ///				
 ///			 </returns>
 // #############################################################################################
-window['GameMaker_Init'] = GameMaker_Init;  //Keeps this as an entry point for Google Closure Compiler
 
 var g_obf2var = undefined;
 
 function GameMaker_Init() 
 {
     debug('------- GameMaker_Init -------------');
-    if (!document.getElementById || !document.createElement) return;
-	canvas = document.getElementById(g_CanvasName);
-
+    // if (!document.getElementById || !document.createElement) return;
+	// canvas = document.getElementById(g_CanvasName);
+    canvas = {canvas: Screen.getMode()}
+    debug("Attempting to set getContext on canvas")
+    canvas.getContext = () => {
+        console.log("getContext called")
+        // This could end up being very load bearing mock 
+        // TODO: Do this the right way
+        return {
+            webkitBackingStorePixelRatio: 1,
+            mozBackingStorePixelRatio: 1,
+            msBackingStorePixelRatio: 1,
+            oBackingStorePixelRatio: 1,
+            backingStorePixelRatio: 1,
+            canvas: canvas.canvas,
+            beginPath: () => { console.log("beginPath called") },
+            moveTo: () => { console.log("moveTo called") },
+            lineTo: () => { console.log("lineTo called") },
+            clip: () => { console.log("clip called") },
+        }
+    }
+    // PS2 resolution is 640x448, can hardcode for now
+    canvas.getBoundingClientRect = () => {
+        return {
+            left: 0,
+            top: 0,
+            right: 640,
+            bottom: 448,
+        }
+    }
 	graphics = null;
 	if( !canvas) return;
+    debug('got canvas')
 	
     // @if function("parameter_*")
-    ParseURL( window.location );
+    // ParseURL( window.location );
 	// @endif
     g_pGMFile = JSON_game;
-
+    debug("JSON_game")
 	// initialise the map of obfuscated names to var 
 	if (typeof g_var2obf !== "undefined") {
 		g_obf2var = Object.getOwnPropertyNames(g_var2obf).reduce((acc, prop) => {
@@ -634,13 +690,13 @@ function GameMaker_Init()
 	} // end if
 
     if (g_pGMFile.Options.outputDebugToDiv) {
-        var logOutput = document.createElement('div');
-        logOutput.id = "yyDebugDiv";
-        logOutput.style.display = "none";
-        document.body.appendChild(logOutput);
+        // var logOutput = document.createElement('div');
+        // logOutput.id = "yyDebugDiv";
+        // logOutput.style.display = "none";
+        // document.body.appendChild(logOutput);
     }
 
-    DetectBrowser();
+    // DetectBrowser();
 
     if ((g_pGMFile.Options && g_pGMFile.Options.debugMode) || (g_pGMFile.Options && g_pGMFile.Options.debugMode == undefined))
     {
@@ -650,7 +706,11 @@ function GameMaker_Init()
 	
 	if((g_pGMFile.Options!= undefined) && (g_pGMFile.Options.AssetCompilerMajorVersion !=undefined) && (g_pGMFile.Options.AssetCompilerMajorVersion>1) )
 	{
-	    g_isZeus = true;
+        // Pretty sure, Zeus is the codename for the GM2 runtime, this HTML5 runtime has been in dev since the GM8 days (GMHTML5)
+        // We should be able to support a lot of Zeus' features, but not all of it. Set false for now
+        // TODO: Research what we can keep of Zeus
+        debug("attempt to set g_isZeus to true")
+	    // g_isZeus = true;
 	    
 	    if(g_pGMFile.Options.GameSpeed!=undefined)
 	    {
@@ -658,21 +718,27 @@ function GameMaker_Init()
 	    }
 	    
 	}
+
+    debug("Past DetectBrowser")
 	
 
 	RegisterPauseEvents();
+    debug("Past RegisterPauseEvents")
 
-	// Initialise WebGL OR Canvas as needed
+    // Initialise WebGL OR Canvas as needed
 	g_OpenGLRequired = false;
+    console.log("g_OpenGLRequired")
 
     //Shifted out here as non-webgl will now use these
     g_Matrix = [];
     g_Matrix[MATRIX_PROJECTION] = new Matrix();
     g_Matrix[MATRIX_VIEW] = new Matrix();
     g_Matrix[MATRIX_WORLD] = new Matrix();
-
+    debug("Past Matrix init")
 	if ((g_pGMFile.Options.WebGL) && (g_pGMFile.Options.WebGL != 0))
 	{
+        // TODO: Not supporting WebGL ever, PS2 just doesn't have the hardware or shader support that GM uses WebGL for
+        debug("InitWebGL - shouldn't see this")
 	    g_InterpolatePixels = g_pGMFile.Options.interpolatePixels;
 		var glinit = undefined;
 		glinit = InitWebGL(canvas);   
@@ -690,12 +756,17 @@ function GameMaker_Init()
 		}
 	} 
 	else {
+        debug("Getting canvas context")
+        debug("canvas", canvas)
 		graphics = canvas.getContext('2d');
 	}
+    debug("Gotten canvas context")
 	g_CurrentGraphics = graphics;
 
 	g_Collision_Compatibility_Mode = g_pGMFile.Options.CollisionCompatibility;
     g_Legacy_Primitive_Drawing = g_pGMFile.Options.LegacyPrimitiveDrawing;
+
+    debug("Compatibility modes")
 
     if (g_Legacy_Primitive_Drawing == false)
     {
@@ -704,7 +775,8 @@ function GameMaker_Init()
 
  	g_LastCanvasWidth = canvas.width;
     g_LastCanvasHeight = canvas.height;    
-    
+    debug("Last canvas width and height")
+
     // @if feature("audio")
     if ((g_pGMFile.Options.UseNewAudio == true) || g_isZeus) {
         g_AudioModel = Audio_WebAudio;
@@ -713,8 +785,9 @@ function GameMaker_Init()
 
     
 
-    document.body.style.overflow = "hidden";
+    // document.body.style.overflow = "hidden";
 
+    debug("past hidden document body style")
 	GlobalGraphicsHandle = graphics;	
 
     g_OriginalWidth  = canvas.width;
@@ -733,6 +806,7 @@ function GameMaker_Init()
     g_CanvasBackingScorePixelRatio = (graphics.webkitBackingStorePixelRatio || graphics.mozBackingStorePixelRatio || graphics.msBackingStorePixelRatio ||
                                       graphics.oBackingStorePixelRatio || graphics.backingStorePixelRatio || 1);
     g_CanvasPixelScale = g_DevicePixelRatio / g_CanvasBackingScorePixelRatio;
+    debug("past device pixel ratio")
     
     g_CanvasRect = new YYRECT();
     CalcCanvasLocation(canvas,g_CanvasRect);
@@ -740,6 +814,7 @@ function GameMaker_Init()
     canvasMinX = g_CanvasRect.left;
     canvasMaxX = g_CanvasRect.right;
     canvasMaxY = g_CanvasRect.bottom;
+    debug("past canvas rect", g_CanvasRect)
     
     //if facebook is enabled, initialise it now, and defer creating the debug console ( as it interferes with fbAsyncInit callback )
     if (g_pGMFile.Options.Facebook && !g_pGMFile.Options.UseFBExtension)
@@ -750,27 +825,27 @@ function GameMaker_Init()
     // @if feature("debug")
     else if (g_pGMFile.Options && g_pGMFile.Options.debugMode)
     {
-        CreateDebugConsole();
+        // CreateDebugConsole();
+        debug("Past CreateDebugConsole, disabled for now")
     }
     // @endif
 
 	// Remember these settings, as FULLSCREEN will mess them up.
 	RememberCanvasSettings();
+    debug("Past RememberCanvasSettings")
 
 	// Update the canvas to use OUR functions. This helps obfuscation, and will shrink the code base.
 	Graphics_AddCanvasFunctions(graphics);
 
-
 	//document.body.appendChild( canvas );
-	
-	document.body.oncontextmenu = function() { return false; };
-	
-
-    bindTouchEvents();
+	// document.body.oncontextmenu = function() { return false; };
+    // bindTouchEvents();
 
 	// If we have a loading screen... find it.
-    g_LoadingScreen = document.getElementById('GM4HTML5_loadingscreen');
-
+    // TODO: Implement loading screen with canvas vs html code
+    // g_LoadingScreen = document.getElementById('GM4HTML5_loadingscreen');
+    g_LoadingScreen = null;
+    debug("g_LoadingScreen")
 
 
     //requestAnimationFrame
@@ -782,14 +857,18 @@ function GameMaker_Init()
     //	g_DebugMode = true; 	// if in DEBUG mode, allow console output.
     //	//hideshow(g_debug_window.document.getElementById('debug_console'));
     //}
-    if (g_webGL && g_DebugMode)
-    {
-    	debug("WebGL Enabled!");
-    	debug("Max Texture Size=" + g_webGL.GetMaxTextureSize());
-    }
+    debug("g_webGL and g_DebugMode")
+    // if (g_webGL && g_DebugMode)
+    // {
+    // 	debug("WebGL Enabled!");
+    // 	debug("Max Texture Size=" + g_webGL.GetMaxTextureSize());
+    // }
+
+    debug("About to InitAboyne and YoYo_Init")
     InitAboyne();                               // Init the "runtime" engine
     YoYo_Init();                                // Init the YoYo GML functions       
-
+    debug("Past InitAboyne and YoYo_Init")
+    
 	// IF we required WebGL and it's not available, ignore everything and abort.
 	if (g_OpenGLRequired)
 	{
@@ -805,25 +884,30 @@ function GameMaker_Init()
 		g_StartUpState = 0;
 
 	}
-
+    debug("Past openGLREquired check")
     /* Focus our window (or iframe) now... */
-	window.focus();
+	// window.focus();
 
     /* ...and whenever the canvas is clicked. */
-	canvas.addEventListener("click", function (e) {
-	    window.focus();
-	});
+	// canvas.addEventListener("click", function (e) {
+	    // window.focus();
+	// });
 
     /* ...this helps with eliminating stutter on mobile */
-    document.addEventListener('touchstart', e => {
-        e.preventDefault();
-    }, {
-        passive: false
-    });
-    
+    // document.addEventListener('touchstart', e => {
+        // e.preventDefault();
+    // }, {
+    //     passive: false
+    // });
+    debug("past window focus and touch events")
     g_FrameStartTime = Date.now();
+    debug("About to requestAnimFrame", window.requestAnimFrame)
 	window.requestAnimFrame(animate);
 }
+
+// TODO: I really wanna get rid of all the globals, but that's gonna be a pain in the ass for another day
+window['GameMaker_Init'] = GameMaker_Init;  //Keeps this as an entry point for Google Closure Compiler
+
 
 /*var dv1 = document.getElementById('gamemaker_image');
 dv1.style.left=xxx+"px";
@@ -846,28 +930,34 @@ if( div_a>360 ) div_a-=360;
 ///			 </returns>
 // #############################################################################################
 function animate() {
+    debug("In animate")
     // once in-game, timing is handled by GameMaker_Tick
     if (g_StartUpState != 3) window.requestAnimFrame(animate);
     
-
+    debug("if g_LoadingCanvasCreated")
     if (g_LoadingCanvasCreated) {
+        // This code just manually grabs the canvas position and size, then overlays a loading screen
+        // We're not in a browser, let's not do this
         // Adjust the location each tick to adjust for centering/moving etc.
-        CalcCanvasLocation(canvas, g_CanvasRect);
-        var load = document.getElementById("loading_screen");
-        load.style.position = "absolute";
-        load.style.left = g_CanvasRect.left+"px";
-        load.style.top = g_CanvasRect.top + "px";
+        // CalcCanvasLocation(canvas, g_CanvasRect);
+        // var load = document.getElementById("loading_screen");
+        // load.style.position = "absolute";
+        // load.style.left = g_CanvasRect.left+"px";
+        // load.style.top = g_CanvasRect.top + "px";
     }
 
     var done = false;
+    debug("animate while(!done)")
     while(!done)
     {
         done=true;
+        debug("switch (g_StartUpState) ", g_StartUpState)
         switch (g_StartUpState)
         {
             // Handle error case
             case -2:
                 {
+                    debug("error case, delete the loading canvas")
                     if (g_LoadingCanvasCreated) DeleteLoadingCanvas();
                     // @if feature("gl")
                     yyWebGLRequiredError(graphics, DISPLAY_WIDTH, DISPLAY_HEIGHT);
@@ -883,7 +973,7 @@ function animate() {
                         g_StartUpState = 1;
                         done = false;
                     }
-
+                    debug("ProcessFileLoading")
                     ProcessFileLoading();
 
                     // If there is a custom loading bar callback
@@ -899,25 +989,28 @@ function animate() {
                                 g_LoadingCanvasCreated=true;
 
                                 // Evaluate the callback
-                                try
-                                {
-                                    var _loadingBarCallback = eval(g_pGMFile.Options.loadingBarCallback);
-                                    // Update the loading bar global callback
-                                    g_LoadingBarCallback = _loadingBarCallback;
-                                }
-                                catch (_err)
-                                {
-                                    // Wval failed fallback to using the default one.
-                                    console.error('Invalid loading bar extension "' + g_pGMFile.Options.loadingBarCallback + '", using default!');
-                                    console.dir(_err);
-                                }
+                                // try
+                                // {
+                                //     var _loadingBarCallback = eval(g_pGMFile.Options.loadingBarCallback);
+                                //     // Update the loading bar global callback
+                                //     g_LoadingBarCallback = _loadingBarCallback;
+                                // }
+                                // catch (_err)
+                                // {
+                                //     // Wval failed fallback to using the default one.
+                                //     console.error('Invalid loading bar extension "' + g_pGMFile.Options.loadingBarCallback + '", using default!');
+                                //     console.dir(_err);
+                                // }
                             }
                             // This will either be the custom bar or the default if the eval failed (call the update callback)
-                            g_LoadingBarCallback(g_LoadGraphics, DISPLAY_WIDTH, DISPLAY_HEIGHT, g_LoadingTotal, g_LoadingCount, g_LoadingScreen);  
+                            debug("g_LoadingBarCallback", g_LoadingBarCallback)
+                            debug("loading callback args ", g_LoadGraphics, DISPLAY_WIDTH, DISPLAY_HEIGHT, g_LoadingTotal, g_LoadingCount, g_LoadingScreen)
+                            // g_LoadingBarCallback(g_LoadGraphics, DISPLAY_WIDTH, DISPLAY_HEIGHT, g_LoadingTotal, g_LoadingCount, g_LoadingScreen);  
                         }
                     }
                     // Default loading screen
                     else {
+                        debug("Default loading screen path")
                         // Create the loading canvas right away
                         if(!g_LoadingCanvasCreated)
                         {
@@ -925,7 +1018,8 @@ function animate() {
                             g_LoadingCanvasCreated=true;
                         }
                         // This will be the default loading bar callback (see: yyRenderStandardLoadingBar)
-                        g_LoadingBarCallback(g_LoadGraphics, DISPLAY_WIDTH, DISPLAY_HEIGHT, g_LoadingTotal, g_LoadingCount, g_LoadingScreen);  
+                        debug("loading callback args ", g_LoadGraphics, DISPLAY_WIDTH, DISPLAY_HEIGHT, g_LoadingTotal, g_LoadingCount, g_LoadingScreen)
+                        // g_LoadingBarCallback(g_LoadGraphics, DISPLAY_WIDTH, DISPLAY_HEIGHT, g_LoadingTotal, g_LoadingCount, g_LoadingScreen);  
                     }                
                 }
                 break;
@@ -936,6 +1030,7 @@ function animate() {
                     // We finished loading and extensions should also have loaded (if not wait)
                     if (g_ExtensionCount >= g_ExtensionTotal)
                     {
+                        debug("case 1 - we finished loading")
                         // Delete lading canvas and load the actual game
                         DeleteLoadingCanvas();
                         LoadGame(g_pGMFile);
@@ -952,13 +1047,16 @@ function animate() {
                     g_LoadingCompleteCallback();
                     debug("Entering main loop...");
                     StartGame();
+                    debug("Past StartGame")
                     g_StartUpState = 3;
                     g_pBuiltIn.last_time = new Date().getTime();
                     done = false;
+                    debug("Past g_pBuiltIn.last_time")
                 }
                 break;
 
             case 3:
+                debug("In case 3 - startingGameMaker_Tick")
                 GameMaker_Tick();
                 break;	
         }
@@ -1116,6 +1214,7 @@ function    CreateRoomBackgrounds( _pRoom  )
 }
 
 
+// TODO: If we do keep debug, want to make sure this is correct for PS2 architecture
 function roughSizeOfObject_debug(object) {
 
     var objectList = [];
@@ -1160,6 +1259,7 @@ function roughSizeOfObject_debug(object) {
 // #############################################################################################
 function StartRoom( _numb, _starting )
 {
+    debug("In StartRoom ", g_RunRoom)
 	// get the current room
 	if( g_RunRoom )
 	{
@@ -1197,20 +1297,20 @@ function StartRoom( _numb, _starting )
             }
         }	
 	}
-
+    debug("Past if g_RunRoom ", g_RunRoom)
     var g_CurrentRoom = g_RunRoom;
-
+    debug("Past g_CurrentRoom ", g_CurrentRoom)
     // This must be set before performing the room_end event else the event will be blocked
     New_Room = -1;
     
     // @if feature("particles") && function("effect_")
     effect_clear();
     // @endif
-    
+    debug("Past effect_clear")
     // @if feature("layerEffects")
     g_pEffectsManager.ExecuteEffectEventsForRoom(EFFECT_ROOM_END_FUNC, g_RunRoom);
     // @endif
-    
+    debug("Past g_pEffectsManager.ExecuteEffectEventsForRoom")
     g_pInstanceManager.PerformEvent(EVENT_OTHER_ENDROOM, 0);
 
     // @if feature("particles")
@@ -1218,7 +1318,8 @@ function StartRoom( _numb, _starting )
     // @endif
     
     // @if function("virtual_key_*")
-    DeleteAllVirtualKeys();    
+    // TODO: Revisit when IO is implemented, probably won't need this either way
+    // DeleteAllVirtualKeys();    
     // @endif
 
     // Extract all persistent instances from the room currently in use.
@@ -1227,6 +1328,7 @@ function StartRoom( _numb, _starting )
     // the instances from the instance pool and thus end up with 2x the instances we should    
     var persistent = [];
     var persinstlayernames = [];
+    debug("Past persistent and persinstlayernames ", g_CurrentRoom)
     if (g_CurrentRoom != null)
     {            
         // Loop through all the active instances and copy any persistent ones to the persistent array        
@@ -1329,14 +1431,15 @@ function StartRoom( _numb, _starting )
 			pInst.pObject.AddInstance(pInst);
 		}
 	}
-	
+	debug("Past CreateRoomFromStorage")
 	
 	g_pBuiltIn.room = g_RunRoom.id;	
 	SetCanvasSize();
-
+    debug("Past SetCanvasSize")
 	g_pLayerManager.RestoreUILayers(g_RunRoom);
-	UILayers_Create();
-
+    // this is an entire ass flexbox engine??????
+	// UILayers_Create();
+    debug("Past UILayers_Create")
     //initialise view scaledport properties- mouse_x/y will return NaN until first draw otherwise
 	var sx = g_AppSurfaceRect.w / (g_roomExtents.right - g_roomExtents.left);
 	var sy = g_AppSurfaceRect.h / (g_roomExtents.bottom - g_roomExtents.top);
@@ -1350,47 +1453,52 @@ function StartRoom( _numb, _starting )
 	    pView.scaledportx2 = pView.scaledportx + pView.scaledportw;
 	    pView.scaledporty2 = pView.scaledporty + pView.scaledporth;
 	}
-
+    debug("Past view scaledport properties")
     CreateRoomBackgrounds( g_RunRoom );
-    
+    debug("Past CreateRoomBackgrounds")
     // Initialise effects
     // @if feature("layerEffects")
     g_pEffectsManager.Init();
     // @endif
-
+    debug("Past g_pEffectsManager.Init")
     // Set up runtime data for this room's layers
     if(g_pLayerManager!=null)
         g_pLayerManager.BuildRoomLayerRuntimeData(g_RunRoom);
-
+    debug("Past g_pLayerManager.BuildRoomLayerRuntimeData")
     // @if feature("particles")
     ParticleSystem_AddAllToLayers();
     // @endif
-
+    debug("Past ParticleSystem_AddAllToLayers")
 	// If this room is NOT persistent then we need to recreate all instances EXCEPT those that already exist in the persistent list
 	// Any instance created in here will perform the create event... including "new" PERSISTENT instances
 	if (ispersistent === false)
 	{
+        debug("Past if ispersistent === false")
 	    // Build the physics world for this room if not persistent and one is required
         // @if feature("physics")
 	    g_RunRoom.BuildPhysicsWorld();
         // @endif
-	    
+        debug("Past g_RunRoom.BuildPhysicsWorld")
         // Loop through all instances in the storage of the room and create the ones NOT in the persistent list...
         g_RunRoom.ClearInstances(false);
+        debug("Past g_RunRoom.ClearInstances")
 	    // g_RunRoom.m_Active = new yyOList(); //Fritz Closure changes was         m_Active = new yyOList();
         // which makes no sense. ClearInstances was nuking the list
+        // debug("g_RunRoom ", JSON.stringify(g_RunRoom.m_pStorage))
         var pInstStorage = g_RunRoom.m_pStorage.pInstances;
         for (var l=0; l < g_RunRoom.m_pStorage.pInstances.length; l++)
         {
+            debug("for loop l", l)
             var found = false;
             var pIStore = g_RunRoom.m_pStorage.pInstances[l];
-            
+            debug("current instance ", JSON.stringify(pIStore))
             if (pIStore.index >= 0)
             {                
                 // Now check to see if this instance exists in the persistent list and has thus already been created
                 for (var u=persistent.length-1;u>=0;u--)
                 {
                     if( pIStore.id == persistent[u].id ) {
+                        debug("instance found in persistent list")
                         found = true;
 
                         // Remove the persistent instance from the layer system (otherwise we end up adding it multiple times)
@@ -1403,12 +1511,13 @@ function StartRoom( _numb, _starting )
                 // if it doesn't then create it and add it to the room, and execute any creation code and events we need
                 if (!found)
                 {
+                    debug("instance was not found, creating it to the room")
                 	var pInstance = g_RunRoom.CreateInstance(pIStore.x, pIStore.y, pIStore.id, pIStore.index, pIStore.scaleX, pIStore.scaleY, pIStore.imageSpeed, pIStore.imageIndex, pIStore.rotation, pIStore.colour);                	    
                 	pInstance.createdone = false; 
                 }
             }
         }        
-        
+        debug("Past for loop 1")
         for(var l=0; l < g_RunRoom.m_creationOrder.length; l++)
         {
             var pIStore = g_RunRoom.m_creationOrder[l];
@@ -1438,9 +1547,11 @@ function StartRoom( _numb, _starting )
             	
             }
         }
+        debug("Past for loop 2")
 	}
     else
 	{
+        debug("Past else")
 	    // We want to run through the persistent list and make sure they don't exist on any layers already (as we'll be added them after)
 	    for (var u = persistent.length - 1; u >= 0; u--)
 	    {
@@ -1484,7 +1595,7 @@ function StartRoom( _numb, _starting )
             }
         }
     }
-    
+    debug("Past for loop 3")
     if(g_isZeus)
     {
         if(g_pCameraManager!=null)
@@ -1496,11 +1607,13 @@ function StartRoom( _numb, _starting )
     // Start the room, performing the correct events
     if (_starting) {
         g_pInstanceManager.PerformEvent(EVENT_OTHER_STARTGAME, 0 );
+        debug("Past g_pInstanceManager.PerformEvent(EVENT_OTHER_STARTGAME, 0 )")
     }
 
     // If the room has startup code, execute it...  
     if ((ispersistent == false) && (g_RunRoom.m_code != null))
     {
+        debug("Executing room startup code")
         var pDummyInst = new yyInstance(0, 0, 0, 0, false, true);
         //try {
     		g_RunRoom.m_code(pDummyInst,pDummyInst);
@@ -1509,14 +1622,15 @@ function StartRoom( _numb, _starting )
     	//}
     	pDummyInst = null;
     }    
-    
+    debug("PerformEvent")
     g_pInstanceManager.PerformEvent(EVENT_OTHER_STARTROOM,0);
     // @if feature("layerEffects")
     g_pEffectsManager.ExecuteEffectEventsForRoom(EFFECT_ROOM_START_FUNC, g_RunRoom);
     // @endif
+    debug("executeeffectseventsforroom")
     
     g_RunRoom.m_Initialised = true;
-
+    debug("room initialized")
 /*  
     // draw room for the first time
     if (New_Room == -1)
@@ -1548,6 +1662,7 @@ function    SwitchRoom( _NewRoom )
 // #############################################################################################
 function    StartGame()
 {
+    debug("In StartGame")
 	//g_pObjectManager.Create_Object_Lists();
 	g_pBuiltIn.score = 0;	
 	g_pBuiltIn.lives = -1;
@@ -1566,20 +1681,23 @@ function    StartGame()
     if (New_Room >= 0) {
         startRoom = New_Room;
     }
-
+    debug("About to StartRoom")
 	StartRoom( startRoom, true );
-    
+    debug("Past StartRoom")
     g_FrameStartTime = Date.now();
 	lastfpstime = g_FrameStartTime;
 	g_pBuiltIn.fps = Fps;
 	g_pBuiltIn.fps_real = Fps;
-
+    debug("Past fps")
     // @if feature("audio")
-    if(g_AudioModel == Audio_WebAudio)
-    {
-        // Audio: Report current device status to the newly created room
-        Audio_EngineReportState();
-    }
+
+    //TODO: Enable audio
+    // if(g_AudioModel == Audio_WebAudio)
+    // {
+    //     // Audio: Report current device status to the newly created room
+    //     Audio_EngineReportState();
+    // }
+    debug("Past Audio_EngineReportState")
     // @endif audio
 }
 
@@ -1727,140 +1845,235 @@ function UpdateCollisions() {
 ///          </summary>
 // #############################################################################################
 function    GameMaker_DoAStep() {
-
+    //TODO: Commenting the entire step out, gonna eat this elephant one bite at a time
+    debug("In GameMaker_DoAStep: Start");
+// Calculate delta time
 	g_pBuiltIn.delta_time = (g_CurrentTime - g_pBuiltIn.last_time)*1000;
 	g_pBuiltIn.last_time = g_CurrentTime;
+    debug("Calculated delta_time and updated last_time");
 
-    // @if feature("sequences_min")
-    ResetSpriteMessageEvents();
-    // @endif sequences_min
+// // @if feature("sequences_min")
+//     debug("Resetting Sprite Message Events");
+//     ResetSpriteMessageEvents();
+// // @endif sequences_min
+
+//     debug("Calling g_pIOManager.StartStep()");
+//     // TODO: Uncomment this when we've implement IO for the PS2
+// 	// g_pIOManager.StartStep();	
+//     debug("Handling OS Events");
+// 	HandleOSEvents();
+
+//     /// @if feature("gamepad")
+//     debug("Updating Gamepad Manager");
+// 	g_pGamepadManager.Update();
+//     /// @endif
+
+//     debug("Remembering old positions");
+// 	g_pInstanceManager.RememberOldPositions(); // Remember old positions
+
+//     // This is how far we've gotten before crashing
+//     debug("Updating instance images");
+// 	g_pInstanceManager.UpdateImages();
+
+//     debug("Updating active lists (pre-layer update)");
+// 	UpdateActiveLists();
+// 	if (New_Room != -1) {
+//         debug("New_Room != -1 after UpdateActiveLists, aborting step");
+//         return;
+//     }
+
+//     debug("Updating layers");
+//     g_pLayerManager.UpdateLayers();
+
+
+//     // Handle events that must react to the old position
+//     // @if feature("sequences")
+//     debug("Performing Sequence Events: EVENT_STEP_BEGIN");
+//     g_pSequenceManager.PerformInstanceEvents(g_RunRoom, EVENT_STEP_BEGIN);
+//     // @endif
+//     debug("Performing Event: EVENT_STEP_BEGIN");
+// 	g_pInstanceManager.PerformEvent(EVENT_STEP_BEGIN, 0);
+
+//     debug("Updating active lists (post-EVENT_STEP_BEGIN)");
+// 	UpdateActiveLists();
+// 	if (New_Room != -1) {
+//         debug("New_Room != -1 after EVENT_STEP_BEGIN, aborting step");
+//         return;
+//     }
+
+//     // If a resize event has been triggered, then do it NOW!
+//     if (g_DoResizeEvent){
+//         debug("Resize event triggered, dispatching EVENT_DRAW_RESIZE");
+// 		g_DoResizeEvent = false;
+// 		g_pInstanceManager.PerformEvent(EVENT_DRAW_RESIZE, 0);
+//     }
+
+//     // ASync loading (and events) are called after the BEGIN step.
+//     debug("Processing ASync events");
+//     g_pASyncManager.Process();
+//     debug("Updating active lists (post-async)");
+//     UpdateActiveLists();
+//     if (New_Room != -1) {
+//         debug("New_Room != -1 after async, aborting step");
+//         return;
+//     }
+
+//     debug("Handling Timeline");
+// 	HandleTimeLine();
+//     debug("Updating active lists (post-timeline)");
+// 	UpdateActiveLists();
+//     if (New_Room != -1) {
+//         debug("New_Room != -1 after timeline, aborting step");
+//         return;
+//     }
+
+//     debug("Handling Time Sources");
+//     HandleTimeSources();
+//     debug("Updating active lists (post-time sources)");
+//     UpdateActiveLists();
+//     if (New_Room != -1) {
+//         debug("New_Room != -1 after time sources, aborting step");
+//         return;
+//     }
+
+//     debug("Handling Alarm Events");
+// 	HandleAlarm();
+//     debug("Updating active lists (post-alarm)");
+// 	UpdateActiveLists();
+// 	if (New_Room != -1) {
+//         debug("New_Room != -1 after alarm, aborting step");
+//         return;
+//     }
+
+// 	// @if feature("keyboard")
+//     debug("Handling Keyboard");
+//     HandleKeyboard();
+//     // @endif
+//     debug("Updating active lists (post-keyboard)");
+// 	UpdateActiveLists();
+// 	if (New_Room != -1) {
+//         debug("New_Room != -1 after keyboard, aborting step");
+//         return;
+//     }
+
+// 	//HandleJoystick();
+// 	//if (New_Room != -1) return;
+
+//     debug("Handling Mouse");
+// 	HandleMouse();
+//     debug("Updating active lists (post-mouse)");
+// 	UpdateActiveLists();
+// 	if (New_Room != -1) {
+//         debug("New_Room != -1 after mouse, aborting step");
+//         return;
+//     }
     
-	g_pIOManager.StartStep();	
-	HandleOSEvents();
-	
-    /// @if feature("gamepad")
-	g_pGamepadManager.Update();
-    /// @endif
-	g_pInstanceManager.RememberOldPositions();                     	// Remember old positions
-	
-	g_pInstanceManager.UpdateImages();
-	UpdateActiveLists();
-	if (New_Room != -1) return;
+//     // @if feature("layerEffects")
+//     debug("Stepping Layer Effects for Room");
+//     g_pEffectsManager.StepEffectsForRoom(g_RunRoom);
+//     // @endif
 
-    g_pLayerManager.UpdateLayers();
+//     // @if feature("sequences")
+//     debug("Updating Instances for Room (sequence animations)");
+// 	g_pSequenceManager.UpdateInstancesForRoom(g_RunRoom);                   // update this at the same time as the step event
+//     debug("Performing Sequence Events: EVENT_STEP_NORMAL");
+// 	g_pSequenceManager.PerformInstanceEvents(g_RunRoom, EVENT_STEP_NORMAL);
+//     // @endif
+//     debug("Performing Event: EVENT_STEP_NORMAL");
+// 	g_pInstanceManager.PerformEvent(EVENT_STEP_NORMAL, 0);                 	//HandleStep(EVENT_STEP_END);	
+//     debug("Updating active lists (post-EVENT_STEP_NORMAL)");
+//     UpdateActiveLists();
+//     if (New_Room != -1) {
+//         debug("New_Room != -1 after EVENT_STEP_NORMAL, aborting step");
+//         return;
+//     }
 
-    // Handle events that must react to the old position
-    // @if feature("sequences")
-    g_pSequenceManager.PerformInstanceEvents(g_RunRoom, EVENT_STEP_BEGIN);
-    // @endif
-	g_pInstanceManager.PerformEvent(EVENT_STEP_BEGIN, 0);
-	UpdateActiveLists();
-	if (New_Room != -1) return;
+//     // @if feature("sequences_min")
+//     debug("Processing Sprite Message Events");
+//     ProcessSpriteMessageEvents();
+//     // @endif sequences_min
 
+//     debug("Updating Instance Positions");
+//     UpdateInstancePositions();
 
-	// If a resize event has been triggered, then do it NOW!
-	if (g_DoResizeEvent){
-		g_DoResizeEvent = false;
-		g_pInstanceManager.PerformEvent(EVENT_DRAW_RESIZE, 0);
-    }
+//     // Handle event that should react to the new position
+//     debug("Handling OTHER events");
+// 	HandleOther();
+//     debug("Updating active lists (post-HandleOther)");
+// 	UpdateActiveLists();
+// 	if (New_Room != -1) {
+//         debug("New_Room != -1 after HandleOther, aborting step");
+//         return;
+//     }
 
-    // ASync loading (and events) are called after the BEGIN step.
-    g_pASyncManager.Process();
-    UpdateActiveLists();
-    if (New_Room != -1) return;
+//     debug("Dispatching YY Events");
+// 	YYPushEventsDispatch();
+//     debug("Updating active lists (post-YYPushEventsDispatch)");
+// 	UpdateActiveLists();
+// 	if (New_Room != -1) {
+//         debug("New_Room != -1 after YYPushEventsDispatch, aborting step");
+//         return;
+//     }
 
-	HandleTimeLine();
-	UpdateActiveLists();
-    if (New_Room != -1) return;
+//     debug("Updating collisions");
+//     UpdateCollisions();	
+//     debug("Updating active lists (post-collisions)");
+// 	UpdateActiveLists();
+// 	if (New_Room != -1) {
+//         debug("New_Room != -1 after UpdateCollisions, aborting step");
+//         return;
+//     }
 
-    HandleTimeSources();
-    UpdateActiveLists();
-    if (New_Room != -1) return;
+// 	// @if feature("sequences")
+//     debug("Performing Sequence Events: EVENT_STEP_END");
+//     g_pSequenceManager.PerformInstanceEvents(g_RunRoom, EVENT_STEP_END);
+//     // @endif
+//     debug("Performing Event: EVENT_STEP_END");
+// 	g_pInstanceManager.PerformEvent(EVENT_STEP_END, 0);                 	//HandleStep(EVENT_STEP_END);
+//     debug("Updating active lists (post-EVENT_STEP_END)");
+//     UpdateActiveLists();
+//     if (New_Room != -1) {
+//         debug("New_Room != -1 after EVENT_STEP_END, aborting step");
+//         return;
+//     }
 
-	HandleAlarm();
-	UpdateActiveLists();
-	if (New_Room != -1) return;
+// 	// Handle the particle systems
+//     // @if feature("particles")
+//     debug("Updating Particle Systems");
+// 	ParticleSystem_UpdateAll();
+//     // @endif
 
-	// @if feature("keyboard")
-    HandleKeyboard();
-    // @endif
-	UpdateActiveLists();
-	if (New_Room != -1) return;
-
-	//HandleJoystick();
-	//if (New_Room != -1) return;
-
-	HandleMouse();
-	UpdateActiveLists();
-	if (New_Room != -1) return;
+//     debug("Bookkeeping & Drawing");
+// 	// Bookkeeping && drawing
+// 	if (g_RunRoom!=null) {
+//         debug("Removing marked instances");
+//     	g_RunRoom.RemoveMarked();
+//     	if (Draw_Automatic) {
+//             debug("Drawing Room (Draw_Automatic=true)");
+//     	    g_RunRoom.Draw();
+//             debug("Updating active lists (post-draw)");
+//     	    UpdateActiveLists();
+//     	}
+//     }
+//     //RenderBrowserInfo();
     
-    // @if feature("layerEffects")
-    g_pEffectsManager.StepEffectsForRoom(g_RunRoom);
-    // @endif
-    // @if feature("sequences")
-	g_pSequenceManager.UpdateInstancesForRoom(g_RunRoom);                   // update this at the same time as the step event
-	g_pSequenceManager.PerformInstanceEvents(g_RunRoom, EVENT_STEP_NORMAL);
-    // @endif
-	g_pInstanceManager.PerformEvent(EVENT_STEP_NORMAL, 0);                 	//HandleStep(EVENT_STEP_END);	
-    UpdateActiveLists();
-    if (New_Room != -1) return;
-
-    // @if feature("sequences_min")
-    ProcessSpriteMessageEvents();
-    // @endif sequences_min
-
-    UpdateInstancePositions();
-
-	// Handle event that should react to the new position
-	HandleOther();
-	UpdateActiveLists();
-	if (New_Room != -1) return;
-
-
-	YYPushEventsDispatch();
-	UpdateActiveLists();
-	if (New_Room != -1) return;
-
-    UpdateCollisions();	
-	UpdateActiveLists();
-	if (New_Room != -1) return;
-
-	// @if feature("sequences")
-    g_pSequenceManager.PerformInstanceEvents(g_RunRoom, EVENT_STEP_END);
-    // @endif
-	g_pInstanceManager.PerformEvent(EVENT_STEP_END, 0);                 	//HandleStep(EVENT_STEP_END);
-    UpdateActiveLists();
-    if (New_Room != -1) return;
-
-	// Handle the particle systems
-    // @if feature("particles")
-	ParticleSystem_UpdateAll();
-    // @endif
-
-
-	// Bookkeeping && drawing
-	if (g_RunRoom!=null) {
-    	g_RunRoom.RemoveMarked();
-    	if (Draw_Automatic) {
-    	    g_RunRoom.Draw();
-    	    UpdateActiveLists();
-    	}
-    }
-    //RenderBrowserInfo();
-		
-	g_RunRoom.ScrollBackground();
-		
-	// Set all instances in the new positions
-	//Cursor_Subimage = Cursor_Subimage+1;
-	//if (DebugMode){
-	//	DebugForm->UpdateDebugInfo();
-	//}
-
-	RenderSystemOverlays();
+//     debug("Scrolling Background");
+// 	g_RunRoom.ScrollBackground();
 	
-	// @if feature("audio")
-    audio_update();
-    // @endif audio
+//     // Set all instances in the new positions
+//     //Cursor_Subimage = Cursor_Subimage+1;
+//     //if (DebugMode){
+//     //	DebugForm->UpdateDebugInfo();
+//     //}
+
+//     debug("Rendering System Overlays");
+// 	RenderSystemOverlays();
+
+// 	// @if feature("audio")
+//     debug("Updating Audio System");
+//     audio_update();
+//     // @endif audio
+//     debug("GameMaker_DoAStep: End");
 }
 
 
@@ -2326,23 +2539,29 @@ var g_CollisionEllipseCounter = 0;
 // #############################################################################################
 function GameMaker_Tick() 
 {
+    debug("In GameMaker_Tick")
 	//
 	if (g_webGL) {
 	    // g_webGL.RSMan.Reset();
 	    g_webGL.Flush();
+        debug("Flushed g_webGL");
     }
     
     //
     g_GameTimer.Update();
+    debug("Updated Game Timer");
     var TargetSpeed = g_GameTimer.GetFPS();
+    debug("Got TargetSpeed: " + TargetSpeed);
 
     const last_time_ms = g_CurrentTime;
     g_CurrentTime = Date.now();
+    debug("Updated CurrentTime from " + last_time_ms + " to " + g_CurrentTime);
 
     // Time since last tick (needs to be converted from ms to us)
     const delta_time_us = (g_CurrentTime - last_time_ms) * 1000;
     g_GlobalTimeSource.Tick(delta_time_us);
     g_SDTimeSourceParent.Tick(delta_time_us);
+    debug("Global timers ticked, delta_time_us = " + delta_time_us);
 
     // fps measurement:
 	if (g_CurrentTime >= lastfpstime + 1000) {
@@ -2350,11 +2569,14 @@ function GameMaker_Tick()
         if (g_CurrentTime - g_FrameStartTime < 2000) {
             Fps = newfps;
             g_pBuiltIn.fps = Fps;
+            debug("Updated FPS to: " + Fps);
         }
         newfps = 0;
         lastfpstime = g_CurrentTime;
+        debug("Reset newfps and updated lastfpstime");
 	}
     newfps++;
+    debug("Incremented newfps: " + newfps);
 
     // schedule next frame:
     // this might be best done after if(!Run_Paused) block,
@@ -2364,10 +2586,12 @@ function GameMaker_Tick()
     var delay = g_FrameStartTime + 1000 / TargetSpeed - now;
     if (delay < 0) delay = 0;
     g_FrameStartTime = now + delay;
+    debug("nextFrameAt: " + nextFrameAt + ", now: " + now + ", delay: " + delay + ", g_FrameStartTime: " + g_FrameStartTime);
     if (delay > 4) {
         // 4ms is the general minimum timeout time as per spec,
         // https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html#timers
-        setTimeout(function() {
+        // Use os.setTimeout from athenaenv
+        os.setTimeout(function() {
             if (window.yyRequestAnimationFrame) {
                 window.yyRequestAnimationFrame(animate);
             } else {
@@ -2375,33 +2599,40 @@ function GameMaker_Tick()
                 //animate();
             }
         }, delay); 
+        debug("Scheduled next frame via setTimeout");
     } else {
         if (window.yyRequestAnimationFrame) {
             window.yyRequestAnimationFrame(animate);
         } else {
             window.postMessage("yyRequestAnimationFrame", "*");
         }
+        debug("Scheduled next frame via requestAnimationFrame or postMessage");
     }
 
     if (!Run_Paused)
     {
 		ProcessMisc();
+        debug("Processed miscellaneous tasks");
 
         // MAX of 10 times around this loop... then we HAVE to break out to allow for input to be processed
 		var ErrorCount = 10;            
 		var done = false;
+        debug("Starting main game loop: ErrorCount=10");
 		while (!done)
 		{
 	        done = true;
+            debug("Top of while loop");
 
 		    // update default view each frame.
 		    if (g_RunRoom === null)
 		    {
 			    g_DefaultView.scaledportx2 = g_DefaultView.scaledportw = g_DefaultView.portw = g_DefaultView.worldw = DISPLAY_WIDTH;
 			    g_DefaultView.scaledporty2 = g_DefaultView.scaledporth = g_DefaultView.porth = g_DefaultView.worldh = DISPLAY_HEIGHT;
+                debug("Updated g_DefaultView for null g_RunRoom");
 		    } else
 		    {
 			    SetCanvasSize();
+                debug("Called SetCanvasSize in loop");
 		    }
 
 
@@ -2410,22 +2641,25 @@ function GameMaker_Tick()
 		    // **********************************************
 		    // Start of frame (new_room is always -1 here...)
 		    Graphics_StartFrame();
+            debug("Called Graphics_StartFrame");
             // Do actual game tick code
 		    GameMaker_DoAStep();
+            debug("Called GameMaker_DoAStep");
 		    // not a "flip" just a GL end, so ALWAYS do it...       //was ... if (New_Room < 0)		    
 		    Graphics_EndFrame();
-
-
+            debug("Called Graphics_EndFrame");
 
 			// See whether we should the room || the game
 			switch (New_Room) {
 				case -1:
 					// Nothing needs to be done
+                    debug("SwitchRoom: new_room is -1 (do nothing)");
 					break;
 
 				case ROOM_ENDOFGAME:
 				case ROOM_ABORTGAME:
 					Run_EndGame(false);
+                    debug("SwitchRoom: ROOM_ENDOFGAME or ROOM_ABORTGAME called Run_EndGame(false)");
 					return;
 
 				case ROOM_RESTARTGAME:
@@ -2433,29 +2667,38 @@ function GameMaker_Tick()
 					// Reset rooms to ensure persistence isn't carried over
 					g_pRoomManager.ResetAll();
 					StartGame();
+                    debug("SwitchRoom: ROOM_RESTARTGAME ran EndGame(true), reset rooms, started game");
 					break;
 
 				case ROOM_LOADGAME:
 					LoadGame();
+                    debug("SwitchRoom: ROOM_LOADGAME called LoadGame()");
 					break;
 
 				default:
 					SwitchRoom(New_Room);
 					done = false;
+                    debug("SwitchRoom: default: Switched to room, set done=false");
 					break;
 			}
 		    ErrorCount--;
-		    if (ErrorCount <= 0) break;
+            debug("Decremented ErrorCount: " + ErrorCount);
+		    if (ErrorCount <= 0) {
+                debug("ErrorCount <= 0; breaking loop");
+                break;
+            }
 		}
 
         g_MouseDeltaX = 0;
         g_MouseDeltaY = 0;
+        debug("Reset g_MouseDeltaX/g_MouseDeltaY to 0");
     }
     
 	// if in DEBUG mode, do debug "stuff"
     // @if feature("debug")
 	if (g_pGMFile.Options && g_pGMFile.Options.debugMode) {
 	    UpdateDebugWindow();
+        debug("Updated debug window");
     }
     // @endif
 }
