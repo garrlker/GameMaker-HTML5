@@ -43,6 +43,7 @@ function    yyTextureGroupInfo()
 /** @constructor */
 function    yyTextureGroupInfoManager()
 {
+    debug("In yyTextureGroupInfoManager constructor")
     this.TextureGroupInfo = [];
 }
 

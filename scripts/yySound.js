@@ -258,6 +258,7 @@ function SoundManager_AddRawSound(_url, _id, _ext, _onload, _onerror)
 /** @constructor */
 function    yySoundManager( )
 {
+		debug("In yySoundManager constructor")
     this.Sounds = [];
     this.length = 0;
 }

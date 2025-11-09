@@ -1114,12 +1114,15 @@ function CalcArrayCRC( _pBuffer )
 ///          </summary>
 // #############################################################################################
 function    InitAboyneGlobals() {
-
+	debug("In InitAboyneGlobals")
     InitFastCRC();
-    DetectBrowser();
+    // DetectBrowser();  // TODO: Add PS2 env detection
 
     // @if feature("audio")
-	if(g_AudioModel!= Audio_NoAudio) {
+		// TODO: Remove these once we start on audio
+		g_canPlayMp3 = false;
+		g_canPlayOgg = false;
+	if(g_AudioModel!= Audio_NoAudio && false) {
         
         try {
         var pAudioTest = new Audio();
@@ -1142,8 +1145,9 @@ function    InitAboyneGlobals() {
     if (g_canPlayMp3) debug("Browser CAN play MP3");
     if (g_canPlayOgg) debug("Browser CAN play OGG");
 
-    InitDebugRelease();
-
+		// TODO: If we do keep debug, uncommont then
+    // InitDebugRelease();
+    debug("more aboyne globals");
     Current_View =
     g_RoomID = 0;
     g_RunRoom = null;
@@ -1185,7 +1189,7 @@ function    InitAboyneGlobals() {
     g_CanvasRect = new YYRECT();
     g_DummyInst = new  yyInstance(0, 0, 0, 0, false, true);     // dummy
     g_DummyInst.hagsda = "DUMMY INSTANCE";
-
+		debug("Past dummy instance global");
     //BETA
     g_DrawOffset[0]=-1;
     g_DrawOffset[1]=0;
@@ -1202,7 +1206,7 @@ function    InitAboyneGlobals() {
     g_DrawOffset[12]=0;
     g_DrawOffset[13]=0;
     g_DrawOffset[14]=0xffffffff;
-
+		debug("canvas")
     g_CanvasName = "canvas";
     g_RootDir = "html5game/";
     if (typeof (g_GameMakerHTML5Dir) != "undefined") {
@@ -1259,7 +1263,7 @@ function    InitAboyneGlobals() {
 
     g_AsyncUserID = 0;
     persnumb =0;
- 
+		debug("more globals again")
     /*DISPLAY_WIDTH;
     DISPLAY_HEIGHT;
     canvasMinX;
@@ -1308,25 +1312,28 @@ function    InitAboyneGlobals() {
     g_CurrentCursor=	-1;
     g_CurrentHWCursor = g_pGMFile.Options.showCursor ? cr_default : cr_none;
     g_CurrentCursorFrame=0;
+		debug("Cursor constants?")
 
-
+		// lmao we don't, but TODO: we should support LocalStorage
     SupportsLocalStorage();
-
+	debug("Past SupportsLocalStorage")
 
 	if( g_pGMFile.Options && g_pGMFile.Options.showCursor===false){
-		canvas.style.cursor = "none";
+		// canvas.style.cursor = "none";
 	}
-
+	debug("Past showCursor check")
 	g_CreateEventOrderSwap = false;
 	if (g_pGMFile.Options && g_pGMFile.Options.CreateEventOrder === true){
 		g_CreateEventOrderSwap = true;
 	}
-
-	if (typeof gmlGlobalInit == 'function')
-	{
-		gmlGlobalInit();
+	debug("Past CreateEventOrderSwap check")
+	// I'm sure this is important but lets skip it
+	// 	if (typeof gmlGlobalInit == 'function')
+	// 	{
+	// 		debug("gmlGlobalInit")
+	// 		gmlGlobalInit();
+	// 	}
 	}
-}
 
 function Deg2Rad(_deg) { return ((_deg * Math.PI) / 180.0); }
 
@@ -1639,6 +1646,9 @@ function Instance_SearchLoop2(_pInst, _obj, _notme, _error_code) {
 
 /** @constructor */
 function BrowserDetect() {
+
+	// TODO: Remove Browser detection code, replace return result with strings/envs info for AthenaEnv/PS2
+	return;
 
     /** @this {BrowserDetect} */	
     this.init =  function () {

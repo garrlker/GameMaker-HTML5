@@ -599,6 +599,7 @@ yySprite.prototype.GetScaledBoundingBox = function(_xscale, _yscale)
 ///           </summary>
 // #############################################################################################
 yySprite.prototype.CalcCullRadius = function () {
+	console.log("In calccull radius ", this.pName, this.width, this.height, this.xOrigin, this.yOrigin);
 	// calculate the cull Radius
 	var yorigSQ = (this.yOrigin * this.yOrigin);
 	var xorigSQ = (this.xOrigin * this.xOrigin);
@@ -608,7 +609,6 @@ yySprite.prototype.CalcCullRadius = function () {
 	var TRRadius = ~ ~ceil(sqrt(rorigSQ + yorigSQ));
 	var BLRadius = ~ ~ceil(sqrt(xorigSQ + borigSQ));
 	var BRRadius = ~ ~ceil(sqrt(rorigSQ + borigSQ));
-
 	this.cullRadius = yymax(TLRadius, yymax(TRRadius, yymax(BLRadius, BRRadius)));
 };
 
@@ -1322,26 +1322,51 @@ function DecompressMask(_pSprite, _mask) {
 // #############################################################################################
 function    CreateSpriteFromStorage( _pStore )
 {
-    var pSprite = new yySprite();
-    if( _pStore.pName !== undefined ) pSprite.pName = _pStore.pName;
-	if( _pStore.width !== undefined ) pSprite.width = _pStore.width;							// size of the subimages
-	if( _pStore.height !== undefined ) pSprite.height = _pStore.height;											
-	if( _pStore.bboxLeft !== undefined ) pSprite.bbox.left = _pStore.bboxLeft;
-	if( _pStore.bboxRight !== undefined ) pSprite.bbox.right = _pStore.bboxRight;
-	if( _pStore.bboxTop !== undefined )  pSprite.bbox.top = _pStore.bboxTop;
-	if( _pStore.bboxBottom !== undefined ) pSprite.bbox.bottom = _pStore.bboxBottom;
-	if( _pStore.transparent !== undefined ) pSprite.transparent = _pStore.transparent;							    // Whether transparent
-	if( _pStore.smooth !== undefined ) pSprite.smooth = _pStore.smooth;									// Whether to smooth the boundaries
-	if( _pStore.preload !== undefined) pSprite.preload = _pStore.preload;								    // Whether to preload the texture
-	if( _pStore.bboxMode !== undefined ) pSprite.bboxmode = _pStore.bboxMode;									// Bounding box mode (0=automatic, 1=full, 2=manual)
-	if( _pStore.colCheck !== undefined ) pSprite.colcheck = _pStore.colCheck;								// whether to prepare for precise collision checking
-	if( _pStore.xOrigin !== undefined ) pSprite.xOrigin = _pStore.xOrigin;								    //origin of the sprite
-	if( _pStore.yOrigin !== undefined ) pSprite.yOrigin = _pStore.yOrigin;	
+	var pSprite = new yySprite();
+  //   if( _pStore.pName !== undefined ) pSprite.pName = _pStore.pName;
+	// if( _pStore.width !== undefined ) pSprite.width = _pStore.width;							// size of the subimages
+	// if( _pStore.height !== undefined ) pSprite.height = _pStore.height;											
+	// if( _pStore.bboxLeft !== undefined ) pSprite.bbox.left = _pStore.bboxLeft;
+	// if( _pStore.bboxRight !== undefined ) pSprite.bbox.right = _pStore.bboxRight;
+	// if( _pStore.bboxTop !== undefined )  pSprite.bbox.top = _pStore.bboxTop;
+	// if( _pStore.bboxBottom !== undefined ) pSprite.bbox.bottom = _pStore.bboxBottom;
+	// if( _pStore.transparent !== undefined ) pSprite.transparent = _pStore.transparent;							    // Whether transparent
+	// if( _pStore.smooth !== undefined ) pSprite.smooth = _pStore.smooth;									// Whether to smooth the boundaries
+	// if( _pStore.preload !== undefined) pSprite.preload = _pStore.preload;								    // Whether to preload the texture
+	// if( _pStore.bboxMode !== undefined ) pSprite.bboxmode = _pStore.bboxMode;									// Bounding box mode (0=automatic, 1=full, 2=manual)
+	// if( _pStore.colCheck !== undefined ) pSprite.colcheck = _pStore.colCheck;								// whether to prepare for precise collision checking
+	// if( _pStore.xOrigin !== undefined ) pSprite.xOrigin = _pStore.xOrigin;								    //origin of the sprite
+	// if( _pStore.yOrigin !== undefined ) pSprite.yOrigin = _pStore.yOrigin;	
+
+	// My one liner patch to replace all these lines
+	Object.apply(pSprite, _pStore);
+	debug("at object apply ", 
+		"pName ", _pStore?.pName,
+		"width ", _pStore?.width,
+		"height ", _pStore?.height,
+		"bboxLeft ", _pStore?.bboxLeft,
+		"bboxRight ", _pStore?.bboxRight,
+		"bboxBottom ", _pStore?.bboxBottom,
+		"bboxTop ", _pStore?.bboxTop,
+		"transparent ", _pStore?.transparent,
+		"smooth ", _pStore?.smooth,
+		"preload ", _pStore?.preload,
+		"bboxMode ", _pStore?.bboxMode,
+		"colCheck ", _pStore?.colCheck,
+		"xOrigin ", _pStore?.xOrigin,
+		"yOrigin ", _pStore?.yOrigin,
+		"TPageEntrys ", _pStore?.TPageEntrys
+		)
 	
 	if(_pStore.playbackspeedtype !== undefined) pSprite.playbackspeedtype = _pStore.playbackspeedtype;
 	if(_pStore.playbackspeed !== undefined) pSprite.playbackspeed = _pStore.playbackspeed;
-	
+	debug("Past playback sprite properties")
 		
+
+	debug("_pStore.swf ", _pStore.swf !== undefined)
+	debug("_pStore.vector, ", _pStore.vector !== undefined)
+	debug("_pStore.sequence, ", _pStore.sequence !== undefined)
+	debug("_pStore.nineslice, ", _pStore.nineslice !== undefined)
 	pSprite.Masks = null;
 	// @if feature("swf")
 	if (_pStore.swf !== undefined) {
@@ -1363,6 +1388,8 @@ function    CreateSpriteFromStorage( _pStore )
 	if (_pStore.nineslice !== undefined) {
 	    pSprite.BuildNineSliceData(_pStore.nineslice);
 	}
+
+	debug("Past sprite variants")
 	// @endif
 		
 	if(_pStore.Masks !== undefined) pSprite.Masks = _pStore.Masks;
@@ -1376,7 +1403,7 @@ function    CreateSpriteFromStorage( _pStore )
     {
         pSprite.numb = pSprite.ppTPE.length;
     }
-
+		debug("past masks")
 	// Copy actual entry, and set Crop width+height as it must be at least 1
 	for(var i=0;i<pSprite.ppTPE.length;i++)
 	{
@@ -1386,7 +1413,7 @@ function    CreateSpriteFromStorage( _pStore )
             if( pSprite.ppTPE[i].CropHeight==0 ) pSprite.ppTPE[i].CropHeight=1;
         } // end if
 	}	
-
+	debug("past ppTPE")
 	// Do this after we've set up our TPEs
 	// @if feature("spine")
 	if (_pStore.skel !== undefined) {
@@ -1395,10 +1422,27 @@ function    CreateSpriteFromStorage( _pStore )
 			: undefined;
 	    pSprite.BuildSkeletonData(skeletonData);
 	}
+	debug("past skeleton data")
 	// @endif
-
+	debug("at calc cull radius ", 
+	"pName ", pSprite?.pName,
+	"widthpName ", pSprite?.widthpName,
+	"heightpName ", pSprite?.heightpName,
+	"bboxLeftpName ", pSprite?.bboxLeftpName,
+	"bboxRightpName ", pSprite?.bboxRightpName,
+	"bboxBottompName ", pSprite?.bboxBottompName,
+	"bboxToppName ", pSprite?.bboxToppName,
+	"transparentpName ", pSprite?.transparentpName,
+	"smoothpName ", pSprite?.smoothpName,
+	"preloadpName ", pSprite?.preloadpName,
+	"bboxModepName ", pSprite?.bboxModepName,
+	"colCheckpName ", pSprite?.colCheckpName,
+	"xOriginpName ", pSprite?.xOriginpName,
+	"yOriginpName ", pSprite?.yOriginpName,
+	"TPageEntryspName ", pSprite?.TPageEntryspName
+	)
 	pSprite.CalcCullRadius();    	
-
+	debug("past calc cull radius")
     // Expand masks
     if( pSprite.Masks )
     {
@@ -1411,7 +1455,8 @@ function    CreateSpriteFromStorage( _pStore )
 		}
 
     }
-    _pStore.Decompressed = true;    
+    _pStore.Decompressed = true;
+		debug("return pSprite")
     return pSprite;
 }
 
@@ -3192,6 +3237,7 @@ yySprite.prototype.MarkInstancesAsDirty = function()
 /** @constructor */
 function    yySpriteManager()
 {
+		debug("In yySpriteManager constructor")
     this.Sprites = [];
 }
 

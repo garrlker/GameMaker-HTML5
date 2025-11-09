@@ -176,6 +176,7 @@ yyBackground.prototype.Clear = function () {
 // #############################################################################################
 /** @constructor */
 function yyBackgroundManager() {
+	debug("In yyBackgroundManager constructor")
 	this.images = [];			// raw images. As many as needed.
 	this.background = [];		// backgrounds attached to CURRENT room. (0..7)
 }

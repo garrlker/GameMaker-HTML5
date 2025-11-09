@@ -33,20 +33,24 @@ var NETWORK_EMPTY = 0,
 // #############################################################################################
 function InitAboyne()
 {
-    global = new yyGameGlobals();
-    g_pBuiltIn = new yyBuiltIn();
-	g_pIOManager = new yyIOManager();
+	debug("In InitAboyne")
+	debug("yyGameGlobals")
+	global = new yyGameGlobals();
+	debug("yyBuiltIn")
+	g_pBuiltIn = new yyBuiltIn();
+	debug("yyIOManager") // Disabled for now
+	// g_pIOManager = new yyIOManager();
 	/// @if feature("gamepad")
 	g_pGamepadManager = new yyGamepadManager();
 	/// @endif
-
+	debug("Past gamepadmanager")
 	g_pBuiltIn.pointer_null = new ArrayBuffer(1);
 	g_pBuiltIn.pointer_invalid = new ArrayBuffer(1);	
 	g_pBuiltIn.NaN = Number.NaN;	
 	g_pBuiltIn.infinity = Number.POSITIVE_INFINITY;	
-	
+	debug("About to Graphics_Init")
 	Graphics_Init(canvas);
-
+	debug("Past Graphics_Init")
     g_pInstanceManager = new yyInstanceManager();
 	g_pObjectManager = new yyObjectManager();
     g_pRoomManager = new yyRoomManager();
@@ -72,9 +76,11 @@ function InitAboyne()
     g_pAnimCurveManager = new yyAnimCurveManager();
 	// @endif
 	// @if feature("sequences")
+	debug("At yySequenceManager constructor")
     g_pSequenceManager = new yySequenceManager();
 	// @endif
     g_pTagManager = new TagManager();
+	debug("Past TagManager constructor")
     g_pASyncManager = new yyASyncManager();
     g_pLayerManager = new LayerManager();
 	// @if feature("layerEffects")
@@ -82,9 +88,10 @@ function InitAboyne()
 	// @endif
     g_pCameraManager = new CameraManager();
     InitAboyneGlobals();
-
+	debug("Past InitAboyneGlobals")
     // @if feature("audio")
-	Audio_Init(); 
+		// TODO: Enable Sound
+	// Audio_Init(); 
 	// @endif audio
 
 	g_pCameraManager.Clean();
@@ -434,6 +441,9 @@ var g_YYTextures = [];
 
 function LoadGame_PreLoadAssets(_GameFile) 
 {
+	//TODO: Replace all of the network request calls in each of these different assets with AthenaEnv file calls
+	debug("In LoadGame_PreLoadAssets ", _GameFile)
+	return; // Skip all of this
 	/*jshint evil:true*/
 	var t,id;
     if( _GameFile.Name ) document.title = _GameFile.Name;
@@ -451,8 +461,9 @@ function LoadGame_PreLoadAssets(_GameFile)
     g_LoadingScreen = document.getElementById('GM4HTML5_loadingscreen');
 
 	PreLoadExtensions(_GameFile);
-	g_LoadingBarCallback = yyRenderStandardLoadingBar;
-
+	// TODO: Implement loading bar with canvas vs html
+	// g_LoadingBarCallback = yyRenderStandardLoadingBar;
+	g_LoadingBarCallback = () => { console.log("yyRenderStandardLoadingBar stub called") }
     g_LoadingCount=0;
 	// Load texture pages
 	for (var index = 0; index < _GameFile.Textures.length; index++)
@@ -468,114 +479,120 @@ function LoadGame_PreLoadAssets(_GameFile)
 		g_YYTextures[index] = t;
 	}
 	
+	// TODO: Either enable or remove SWF
 	// Load SWF data if it's present
 	// @if feature("swf")
-	if ((_GameFile.Swfs !== null) && (_GameFile.Swfs !== undefined)) {	
-	    LoadSwfData(_GameFile.Swfs);
-    }
+	// if ((_GameFile.Swfs !== null) && (_GameFile.Swfs !== undefined)) {	
+	//     LoadSwfData(_GameFile.Swfs);
+  //   }
 	// @endif
 
+	// TODO: Either enable or remove Vectors
 	// Load vector sprite data if it's present
 	// @if feature("vec")
-	if ((_GameFile.Vecs !== null) && (_GameFile.Vecs !== undefined)) {	
-	    LoadVecData(_GameFile.Vecs);
-    }
+	// if ((_GameFile.Vecs !== null) && (_GameFile.Vecs !== undefined)) {	
+	//     LoadVecData(_GameFile.Vecs);
+  //   }
 	// @endif
     
-    // Load Spine data if it's present
+ 	// TODO: Either enable or remove Spines
+	// Load Spine data if it's present
 	// @if feature("spine")
-	if ((_GameFile.Skel !== null) && (_GameFile.Skel !== undefined)) {	
-	    LoadSkeletonData(_GameFile.Skel);
-    }
+	// if ((_GameFile.Skel !== null) && (_GameFile.Skel !== undefined)) {	
+	//     LoadSkeletonData(_GameFile.Skel);
+  //   }
 	// @endif
 
+	//TODO: Enable particles, requires image loading
 	// Load the particle textures
 	// @if feature("particles") && feature("particle_images")
-	if (true == g_pGMFile.Options.UseParticles) {
-		for (var i = 2; i < 16; i++){
-			g_LoadingTotal++;
-			var p = LoadParticleImage(g_RootDir + "particles/IDR_GIF" + i + ".png");
+	// if (true == g_pGMFile.Options.UseParticles) {
+	// 	for (var i = 2; i < 16; i++){
+	// 		g_LoadingTotal++;
+	// 		var p = LoadParticleImage(g_RootDir + "particles/IDR_GIF" + i + ".png");
 
-			t = g_ParticleTextures[p].tp;
-			g_Textures[t].onload = LoadGame_ImageLoad;
-			g_Textures[t].onerror = LoadGame_ImageLoad_Error;
-			g_Textures[t].URL = "particles/IDR_GIF" + i + ".png";		
-		}
-	}
+	// 		t = g_ParticleTextures[p].tp;
+	// 		g_Textures[t].onload = LoadGame_ImageLoad;
+	// 		g_Textures[t].onerror = LoadGame_ImageLoad_Error;
+	// 		g_Textures[t].URL = "particles/IDR_GIF" + i + ".png";		
+	// 	}
+	// }
 	// @endif
 
 
+	// TODO: Enable audio
 	// Now load WAV files (not mp3/ogg)
 	// @if feature("audio")
-	if(g_AudioModel == Audio_WebAudio)
-    {
-        for (index = 0; index < _GameFile.Sounds.length; index++)
-	    {
-		    if( _GameFile.Sounds[index] && (  _GameFile.Sounds[index]!==null))
-		    {
-	            var groupId = 0;    //default
-	            if( _GameFile.Sounds[index].groupId !== undefined ){
-	                groupId = _GameFile.Sounds[index].groupId;
-	            }
+	// if(g_AudioModel == Audio_WebAudio)
+  //   {
+  //       for (index = 0; index < _GameFile.Sounds.length; index++)
+	//     {
+	// 	    if( _GameFile.Sounds[index] && (  _GameFile.Sounds[index]!==null))
+	// 	    {
+	//             var groupId = 0;    //default
+	//             if( _GameFile.Sounds[index].groupId !== undefined ){
+	//                 groupId = _GameFile.Sounds[index].groupId;
+	//             }
 	            
-	            if( groupId == 0 )
-	            {
-	                g_LoadingTotal++;
-	                debug("Loading: " + g_RootDir + _GameFile.Sounds[index].origName);
+	//             if( groupId == 0 )
+	//             {
+	//                 g_LoadingTotal++;
+	//                 debug("Loading: " + g_RootDir + _GameFile.Sounds[index].origName);
 
-	                if (_GameFile.Sounds[index].kind === 0)
-	                {
-	                	id = AudioManager_AddRawSound( g_RootDir + _GameFile.Sounds[index].origName,
-													   index,
-													   _GameFile.Sounds[index].pName,
-													   _GameFile.Sounds[index].extension );
-	                    if (id === undefined) {
-	        	            g_LoadingTotal--;
-	                    }
-	                }
-	                else if ((_GameFile.Sounds[index].kind ==3) || (_GameFile.Sounds[index].kind == 1))
-	                {
-	                	Audio_PrepareStream( g_RootDir + _GameFile.Sounds[index].origName,
-											 index,
-											 _GameFile.Sounds[index].pName,
-											 _GameFile.Sounds[index].extension );
-	                    g_LoadingTotal--;
-	                }
-	                else
-	                {
-	                    debug("Attempting to load sound with unknown type: " + _GameFile.Sounds[index].kind);
-	                    g_LoadingTotal--;
-	                }
-	             }
-		    }		
+	//                 if (_GameFile.Sounds[index].kind === 0)
+	//                 {
+	//                 	id = AudioManager_AddRawSound( g_RootDir + _GameFile.Sounds[index].origName,
+	// 												   index,
+	// 												   _GameFile.Sounds[index].pName,
+	// 												   _GameFile.Sounds[index].extension );
+	//                     if (id === undefined) {
+	//         	            g_LoadingTotal--;
+	//                     }
+	//                 }
+	//                 else if ((_GameFile.Sounds[index].kind ==3) || (_GameFile.Sounds[index].kind == 1))
+	//                 {
+	//                 	Audio_PrepareStream( g_RootDir + _GameFile.Sounds[index].origName,
+	// 										 index,
+	// 										 _GameFile.Sounds[index].pName,
+	// 										 _GameFile.Sounds[index].extension );
+	//                     g_LoadingTotal--;
+	//                 }
+	//                 else
+	//                 {
+	//                     debug("Attempting to load sound with unknown type: " + _GameFile.Sounds[index].kind);
+	//                     g_LoadingTotal--;
+	//                 }
+	//              }
+	// 	    }		
 
-	    }
-    }
-    else if (g_AudioModel == Audio_Sound)
-    {
-    	var currentName, currentRawSound;
-	    for (index = 0; index < _GameFile.Sounds.length; index++)
-	    {
-		    if (_GameFile.Sounds[index] !== null)
-		    {
-		    	g_LoadingTotal++;
-		    	currentName = _GameFile.Sounds[index].pName;
-		    	currentRawSound = g_RawSounds[currentName];
+	//     }
+  //   }
+  //   else if (g_AudioModel == Audio_Sound)
+  //   {
+  //   	var currentName, currentRawSound;
+	//     for (index = 0; index < _GameFile.Sounds.length; index++)
+	//     {
+	// 	    if (_GameFile.Sounds[index] !== null)
+	// 	    {
+	// 	    	g_LoadingTotal++;
+	// 	    	currentName = _GameFile.Sounds[index].pName;
+	// 	    	currentRawSound = g_RawSounds[currentName];
 
-	            debug("Loading: " + g_RootDir + _GameFile.Sounds[index].origName);
-	            id = SoundManager_AddRawSound(g_RootDir + _GameFile.Sounds[index].origName, _GameFile.Sounds[index].pName, _GameFile.Sounds[index].extension, LoadGame_SoundLoad, LoadGame_SoundLoad_Error);
-	            if ( ( id !== undefined ) && ( currentRawSound ) && ( currentRawSound.URL ) )
-	            {
-	            	g_LoadingSoundAssets[currentRawSound.URL] = currentRawSound;
-	            }
-	            else
-	            {
-	        	    g_LoadingTotal--;
-	            }
-		    }
-	    }
-	}		
+	//             debug("Loading: " + g_RootDir + _GameFile.Sounds[index].origName);
+	//             id = SoundManager_AddRawSound(g_RootDir + _GameFile.Sounds[index].origName, _GameFile.Sounds[index].pName, _GameFile.Sounds[index].extension, LoadGame_SoundLoad, LoadGame_SoundLoad_Error);
+	//             if ( ( id !== undefined ) && ( currentRawSound ) && ( currentRawSound.URL ) )
+	//             {
+	//             	g_LoadingSoundAssets[currentRawSound.URL] = currentRawSound;
+	//             }
+	//             else
+	//             {
+	//         	    g_LoadingTotal--;
+	//             }
+	// 	    }
+	//     }
+	// }		
 	// @endif audio load
+	debug("Past LoadGame_PreLoadAssets")
 }
 
 
@@ -586,7 +603,8 @@ function LoadGame_PreLoadAssets(_GameFile)
 ///          </summary>
 // #############################################################################################
 function ProcessFileLoading() {
-	
+	//TODO: Replace networkState checks with file io checks
+	debug("In ProcessFileLoading")
 	// NB: With the "old" html5 Audio class in use, onerror is not necessarily hit if a sound
 	//     isn't found on the server, thus we need this loading check to pick up when the 
 	//     network state of the sound is in an error condition	
@@ -739,6 +757,7 @@ function CreateCollisionArrays() {
 // #############################################################################################
 function LoadGame(_GameFile) 
 {
+	debug("In LoadGame")
 	/*jshint evil:true*/
     var index, pRoom,i;
 
@@ -754,12 +773,13 @@ function LoadGame(_GameFile)
     g_pBuiltIn.working_directory = g_RootDir;
     g_pBuiltIn.local_storage = GetLocalStorageRoot();
     if (g_webGL) g_pBuiltIn.webgl_enabled = true;
-    
+    debug("Past built in vars")
+
     // Setup trigger manager first (object init requires them)
     g_pTriggerManager = new yyTriggerManager( _GameFile.Triggers );
-    
+    debug("Past trigger manager")
     g_MD5 =  _GameFile.Options.md5;
-
+    debug("Past MD5")
     
     // Make OBJECTS
     var id = 0;    
@@ -772,12 +792,13 @@ function LoadGame(_GameFile)
 	    }
 	    id++;
     }
+    debug("Past GMObjects")
 
 	// Now we've loaded them all, patch up object parents
     g_pObjectManager.PatchParents();
 
     CreateCollisionArrays();
-
+    debug("Past CreateCollisionArrays")
     
   
 
@@ -785,17 +806,21 @@ function LoadGame(_GameFile)
     // (Load texture pages - now PRE-Startup)
     // Load texture page offsets
 	Graphics_SetEntryTable(_GameFile.TPageEntries);
-
+	debug("Past Graphics_SetEntryTable")
     // Load Sprites
 	// @if feature("sprites")
     for(index=0; index<_GameFile.Sprites.length; index++ ){
         if (!_GameFile.Sprites[index] || (  _GameFile.Sprites[index]===null )) {
+						debug("add null sprite")
             g_pSpriteManager.AddSprite( null );
         }else{
+						debug("attempt to add sprite from storage ", JSON.stringify(_GameFile.Sprites[index]))
             var pSprite = CreateSpriteFromStorage( _GameFile.Sprites[index] ); 
+						debug("created sprite from storage, adding to sprite manager")
             g_pSpriteManager.AddSprite( pSprite );
         }
     }
+	debug("Past Sprites")
 	// @endif sprites
     
 
@@ -809,13 +834,14 @@ function LoadGame(_GameFile)
 			if( pImage!==null ) pImage.copy = TPE_Copy;
 		} // end else
     }
+	debug("Past Backgrounds")
     
     // Load Fonts
 	// @if feature("fonts")
     for(index=0; index<_GameFile.Fonts.length; index++ ){
         g_pFontManager.Add( _GameFile.Fonts[index]);
     }
-
+	debug("Past Fonts")
 	// Load Embedded Fonts
     if ( _GameFile.EmbeddedFonts )
 	{
@@ -825,7 +851,7 @@ function LoadGame(_GameFile)
 		}
 	}
 	// @endif fonts
-
+	debug("Past Embedded Fonts")
     //Make Rooms    
     for (var index = 0; index < _GameFile.GMRooms.length; index++)
     {
@@ -858,7 +884,7 @@ function LoadGame(_GameFile)
             g_pRoomManager.Add( null );	    
         }
     }
-
+	debug("Past Rooms")
 	g_MD5 = _GameFile.Options.crc;
 	//g_MD5CRC = CalcArrayCRC(g_MD5);
 
@@ -884,7 +910,7 @@ function LoadGame(_GameFile)
     g_pBuiltIn.room_first =  firstRoomID;
     g_pBuiltIn.room_last = lastRoomID;
     g_pCameraManager.SetInitialLoadHighPoint();
-
+		debug("Past Camera manager SetInitialLoadHighPoint")
 
 	// Load Paths
     for (index = 0; index < _GameFile.Paths.length; index++)
@@ -892,7 +918,7 @@ function LoadGame(_GameFile)
     	var pPath = CreatePathFromStorage( 	_GameFile.Paths[index] );
     	g_pPathManager.Add( pPath );
     }
-
+		debug("Past Paths")
 
     // Load Sounds
 	// @if feature("audio")
@@ -900,7 +926,7 @@ function LoadGame(_GameFile)
         g_pSoundManager.Add( _GameFile.Sounds[index]);
     }
 	// @endif audio
-    
+		debug("Past Sounds")
 
     // Load Timelines
 	// @if feature("timelines")
@@ -920,7 +946,7 @@ function LoadGame(_GameFile)
         }
     }
 	// @endif
-
+		debug("Past AnimCurves")
     // Load Sequences
 	// @if feature("sequences")
     if (_GameFile.Sequences !== undefined) {
@@ -929,13 +955,13 @@ function LoadGame(_GameFile)
         }
     }
 	// @endif
-
+		debug("Past Sequences")
 	// Load Particle System Emitters
 	// @if feature("particles")
     if (_GameFile.PSEmitters !== undefined) {
 		ParticleSystem_Emitters_Load(_GameFile);
     }
-
+		debug("Past Particle System Emitters")
 	// Load Particle Systems
     if (_GameFile.ParticleSystems !== undefined) {
         for (index = 0; index < _GameFile.ParticleSystems.length; index++) {
@@ -948,7 +974,7 @@ function LoadGame(_GameFile)
         }
     }
 	// @endif
-
+		debug("Past Particle Systems")
 	// Load Effect Defs
 	// @if feature("layerEffects")
 	if (_GameFile.FiltersAndEffectDefs !== undefined) {
@@ -958,21 +984,25 @@ function LoadGame(_GameFile)
         }
 	}
 	// @endif
-
+		debug("layerEffects")
     //Load Tags
     if( Tags !== undefined && IDToTagList !== undefined ) {
         g_pTagManager.LoadTags(Tags, IDToTagList);
     }
-
+		debug("Past Tags")
 	// Load texture group info
 	if (_GameFile.TextureGroupInfo !== undefined)
 	{
+		debug("TextureGroupInfo exists, for loop starting")
 		for(index = 0; index < _GameFile.TextureGroupInfo.length; index++)
 		{
+			debug("TextureGroupInfo index ", index)
 			var pStore = _GameFile.TextureGroupInfo[index];
 			var pTGInfo = new yyTextureGroupInfo();
 
+			debug("pStore.pName ", pStore.pName)
 			if (pStore.pName !== undefined) pTGInfo.pName = pStore.pName;
+			debug("pStore.TextureIDs ", pStore.TextureIDs)
 			if (pStore.TextureIDs !== undefined)
 			{
 				for(var i = 0; i < pStore.TextureIDs.length; i++)
@@ -981,6 +1011,7 @@ function LoadGame(_GameFile)
 				}
 			}
 			// @if feature("sprites")
+			debug("pStore.SpriteIDs ", pStore.SpriteIDs)
 			if (pStore.SpriteIDs !== undefined)
 			{
 				for(var i = 0; i < pStore.SpriteIDs.length; i++)
@@ -990,6 +1021,7 @@ function LoadGame(_GameFile)
 			}
 			// @endif sprites
 			// @if feature("spine")
+			debug("pStore.SpineSpriteIDs ", pStore.SpineSpriteIDs)
 			if (pStore.SpineSpriteIDs !== undefined)
 			{
 				for(var i = 0; i < pStore.SpineSpriteIDs.length; i++)
@@ -999,6 +1031,7 @@ function LoadGame(_GameFile)
 			}
 			// @endif
 			// @if feature("fonts")
+			debug("pStore.FontIDs ", pStore.FontIDs)
 			if (pStore.FontIDs !== undefined)
 			{
 				for(var i = 0; i < pStore.FontIDs.length; i++)
@@ -1007,6 +1040,7 @@ function LoadGame(_GameFile)
 				}
 			}
 			// @endif fonts
+			debug("pStore.TilesetIDs ", pStore.TilesetIDs)
 			if (pStore.TilesetIDs !== undefined)
 			{
 				for(var i = 0; i < pStore.TilesetIDs.length; i++)
@@ -1016,19 +1050,19 @@ function LoadGame(_GameFile)
 			}
 
 			// Spine sprites now just reference textures from the group so we don't need to retrieve them separately
-
 			g_pTextureGroupInfoManager.AddTextureGroupInfo(pTGInfo);
 		}
 	}
-
+	// debug("Past Texture Group Info")
 	// Load the games hiscore table
 	// @if function("draw_highscore") || function("highscore_*")
 	highscore_clear();
     highscore_load();
 	// @endif
+	debug("Past hiscore table")
 
-
-
+	debug("typeof gmlConst ", typeof gmlConst)
+	debug("typeof gmlInitGlobal ", typeof gmlInitGlobal)
 	// Init globals and constants "IF" the functions exist
 	if (typeof gmlConst == 'function'){
     	g_gmlConst = new gmlConst();
@@ -1036,7 +1070,7 @@ function LoadGame(_GameFile)
     if (typeof gmlInitGlobal == 'function'){
     	gmlInitGlobal();
     }
-
+	debug("Past globals and constants")
     // Init Loaded extensions...
 	if (_GameFile.Extensions !== undefined)
 	{
@@ -1068,4 +1102,5 @@ function LoadGame(_GameFile)
 			}
 		}
 	}
+	debug("Past extensions")
 }

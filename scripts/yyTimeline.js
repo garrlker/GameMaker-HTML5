@@ -112,6 +112,7 @@ yyTimeline.prototype.GetLast = function()
 /** @constructor */
 function yyTimelineManager()
 {
+		debug("In yyTimelineManager constructor")
     this.Timelines = [];
 }
 

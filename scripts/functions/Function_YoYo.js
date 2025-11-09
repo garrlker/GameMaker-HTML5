@@ -1210,7 +1210,8 @@ function Get_FullScreenOffset()
     var _top = 0;
     var _right = 0;
     var _bottom = 0;
-    canvas = document.getElementById(g_CanvasName);
+    // TODO: Why are we getting the canvas and not using it????
+    // canvas = document.getElementById(g_CanvasName);
     var cw = DISPLAY_WIDTH;//canvas.width;
     var ch = DISPLAY_HEIGHT;//canvas.height;
     

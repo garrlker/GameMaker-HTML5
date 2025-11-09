@@ -669,6 +669,7 @@ yyAnimCurve.prototype.Evaluate = function (_track, _curveChannel, _requestedChan
 // #############################################################################################
 /** @constructor */
 function yyAnimCurveManager() {
+    debug("In yyAnimCurveManager constructor")
     this.AnimCurves = [];
 }
 

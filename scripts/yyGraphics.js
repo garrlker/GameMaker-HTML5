@@ -78,28 +78,55 @@ function    DisplayHeight(){ return g_DisplayHeight; }
 // #############################################################################################
 function Graphics_AddCanvasFunctions(_graphics)
 {
+	// Shim all of this for now
+	// TODO: Part 1, implement html5 canvas compatible API with Athena canvas equivalent (it's not 1:1 but close enough for now)
+	// TODO: Part 2, using the 3d renderer mode of Athena, implement a fully(minus shaders and incompatible asset formats) GM/d3d-like compatible graphcis renderer
+	debug("Graphics_AddCanvasFunctions")
 	if( !_graphics ) return;
+
+	_graphics._transform = () => { console.log("graphics._transform called") }
+	_graphics._setTransform = () => { console.log("graphics._setTransform called") }
+	_graphics._save = () => { console.log("graphics._save called") }
+	_graphics._restore = () => { console.log("graphics._restore called") }
+	_graphics._fillRect = () => { console.log("graphics._fillRect called") }
+	_graphics._strokeRect = () => { console.log("graphics._strokeRect called") }
+	_graphics._beginPath = () => { console.log("graphics._beginPath called") }
+	_graphics._arc = () => { console.log("graphics._arc called") }
+	_graphics._stroke = () => { console.log("graphics._stroke called") }
+	_graphics._closePath = () => { console.log("graphics._closePath called") }
+	_graphics.lineWidth = () => { console.log("graphics.lineWidth called") }
+	_graphics._moveTo = () => { console.log("graphics._moveTo called") }
+	_graphics._lineTo = () => { console.log("graphics._lineTo called") }
+	_graphics._fill = () => { console.log("graphics._fill called") }
+	_graphics._drawImage = () => { console.log("graphics._drawImage called") }
+	_graphics._getImageData = () => { console.log("graphics._getImageData called") }
+	_graphics._createImageData = () => { console.log("graphics._createImageData called") }
+	_graphics._putImageData = () => { console.log("graphics._putImageData called") }
+	_graphics._clip = () => { console.log("graphics._clip called") }
+	_graphics._rect = () => { console.log("graphics._rect called") }
+
+	debug("Added graphics stubs")
 	
-	_graphics._transform = _graphics.transform;
-	_graphics._setTransform = _graphics.setTransform;
-	_graphics._save = _graphics.save;
-	_graphics._restore = _graphics.restore;
-	_graphics._fillRect = _graphics.fillRect;
-	_graphics._strokeRect = _graphics.strokeRect;
-	_graphics._beginPath = _graphics.beginPath;
-	_graphics._arc = _graphics.arc;
-	_graphics._stroke = _graphics.stroke;
-	_graphics._closePath = _graphics.closePath;
-	_graphics.lineWidth = _graphics.lineWidth;
-	_graphics._moveTo = _graphics.moveTo;
-	_graphics._lineTo = _graphics.lineTo;
-	_graphics._fill = _graphics.fill;
-	_graphics._drawImage = _graphics.drawImage;
-	_graphics._getImageData = _graphics.getImageData;
-	_graphics._createImageData = _graphics.createImageData;
-	_graphics._putImageData = _graphics.putImageData;
-	_graphics._clip = _graphics.clip;
-	_graphics._rect = _graphics.rect;
+	// _graphics._transform = _graphics.transform;
+	// _graphics._setTransform = _graphics.setTransform;
+	// _graphics._save = _graphics.save;
+	// _graphics._restore = _graphics.restore;
+	// _graphics._fillRect = _graphics.fillRect;
+	// _graphics._strokeRect = _graphics.strokeRect;
+	// _graphics._beginPath = _graphics.beginPath;
+	// _graphics._arc = _graphics.arc;
+	// _graphics._stroke = _graphics.stroke;
+	// _graphics._closePath = _graphics.closePath;
+	// _graphics.lineWidth = _graphics.lineWidth;
+	// _graphics._moveTo = _graphics.moveTo;
+	// _graphics._lineTo = _graphics.lineTo;
+	// _graphics._fill = _graphics.fill;
+	// _graphics._drawImage = _graphics.drawImage;
+	// _graphics._getImageData = _graphics.getImageData;
+	// _graphics._createImageData = _graphics.createImageData;
+	// _graphics._putImageData = _graphics.putImageData;
+	// _graphics._clip = _graphics.clip;
+	// _graphics._rect = _graphics.rect;
 	/*_graphics._ = _graphics.;
 	_graphics._ = _graphics.;
 	_graphics._ = _graphics.;
@@ -159,29 +186,32 @@ function texture_set_interpolation(_linear) {
 ///             Main graphics code. globals "canvas" and "graphics" must have been initialised.
 ///          </summary>
 // #############################################################################################
-function    Graphics_Init( _canvas )
+function Graphics_Init( _canvas )
 {
-    g_Textures = [];
-    g_pTextureOffsets = null;
-
+	debug("In Graphics_Init")
+	g_Textures = [];
+	g_pTextureOffsets = null;
+	debug("g_Textures and g_pTextureOffsets")
 	g_clipx = 0;
 	g_clipy = 0;
 	g_clipw = 0;
 	g_cliph = 0;
-
+	debug("g_clipx, g_clipy, g_clipw, g_cliph")
 	g_worldx = 0;
 	g_worldy = 0;
 	g_worldw = 0;
 	g_worldh = 0;
-
-	g_transform = [];
-	g_transform[0] = 1;
-	g_transform[1] = 0;
-	g_transform[2] = 0;
-	g_transform[3] = 0;
-	g_transform[4] = 1;
-	g_transform[5] = 0;
-
+	debug("g_worldx, g_worldy, g_worldw, g_worldh")
+	// Replaced with a single array for brevity and it was crashing for some reason???
+	// g_transform = [];
+	// g_transform[0] = 1;
+	// g_transform[1] = 0;
+	// g_transform[2] = 0;
+	// g_transform[3] = 0;
+	// g_transform[4] = 1;
+	// g_transform[5] = 0;
+	g_transform = [1,0,0,0,1,0];
+	debug("g_transform", g_transform)
     if( !g_webGL ){
 		// @if feature("2d")
 
@@ -193,6 +223,7 @@ function    Graphics_Init( _canvas )
         {
     	    Graphics_TextureDrawSimple = Graphics_TextureDrawSimple_NoCache;
         }
+		debug("Graphics_TextureDrawSimple")
         Graphics_TextureDrawTiled = Graphics_TextureDrawTiled_RELEASE;
         Graphics_TextureDraw = Graphics_TextureDraw_RELEASE;
         Graphics_TextureDrawWH = Graphics_TextureDrawWH_RELEASE;
@@ -216,11 +247,14 @@ function    Graphics_Init( _canvas )
 		Graphics_SWFDrawObject = function () {};
 		Graphics_VectorSpriteDraw = function () {};
 		Graphics_VectorSpriteDrawObject = function () {};
+		debug("Graphics_Interpolation")
 		Graphics_Interpolation = !(g_pGMFile.Options && !g_pGMFile.Options.interpolatePixels);
+		debug("After Graphics_Interpolation")
 
 
 	    // Fill in DEBUG function pointers.
         if(DEBUG_MODE)
+					debug("DEBUG_MODE - should never see this")
         {
     	    if (CACHE_SINGLE_IMAGE)
     	    {
@@ -241,11 +275,11 @@ function    Graphics_Init( _canvas )
 		// @endif gl
     }
 
-
+	debug("About to Graphics_SetViewPort and Graphics_SetViewArea", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
     Graphics_SetViewPort(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
     Graphics_SetViewArea(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT,0);
 
-    
+	debug("End of Graphics_Init")
 }
 
 var g_Graphics_Save_Stack = [];
@@ -489,7 +523,7 @@ function Graphics_SetViewPort_RELEASE(_portx, _porty, _portw, _porth)
     g_clipy = _porty;
     g_clipw = _portw;
     g_cliph = _porth;
-
+	debug("Graphics_SetViewPort_RELEASE", g_isZeus)
 	if (g_isZeus)
 	{
 
@@ -637,6 +671,7 @@ function Graphics_SetViewAreaTransform_RELEASE(_sx, _sy, _tx, _ty)
 // #############################################################################################
 function Graphics_SetViewArea_RELEASE(_worldx, _worldy, _worldw, _worldh, _angle) 
 {
+	debug("in Graphics_SetViewArea_RELEASE", JSON.stringify(canvas))
     if ((g_clipx === 0 && g_clipy === 0) && (g_clipw == graphics.canvas.width && g_cliph === graphics.canvas.height)) {
     } else {
         g_transform[0] = 1;

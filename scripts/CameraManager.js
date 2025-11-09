@@ -16,12 +16,14 @@
 
 /** @constructor */
 function CameraManager() {
+    debug("In CameraManager constructor")
     this.m_InitialLoadHighPoint = 0;
     this.m_pScriptInstance = null;
     this.camId = 0;
     this.m_activeCamera = null;
     this.m_CamPool = new yyList();
     this.m_tempCamera = null;
+    debug("Past CameraManager constructor")
 };
 
 

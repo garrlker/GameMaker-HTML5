@@ -14,8 +14,11 @@
 /// Function:<summary>
 ///          </summary>
 // #############################################################################################
-function SupportsLocalStorage() 
+function SupportsLocalStorage() // return false, we should be able to shim this
 {
+	// TODO: Impl LocalStorage equivalent API for PS2 using AthenaEnv file io
+	debug("In SupportsLocalStorage")
+	return false;
 	try {
 		if (('localStorage' in window) && (window['localStorage'] !== null)) {
 			g_SupportsLocalStorage = true;

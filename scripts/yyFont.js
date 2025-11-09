@@ -1379,6 +1379,7 @@ var FONTSDFSHADER_DISABLED = -1,
 /** @constructor */
 function    yyFontManager( )
 {
+		debug("In yyFontManager constructor")
     this.Fonts = [];
     this.length = 0;
     this.thefont = null;

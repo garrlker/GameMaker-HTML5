@@ -433,6 +433,7 @@ var RTILE_SLAB_SIZE	= 32;
 /** @constructor */
 function LayerManager()
 {
+    debug("In LayerManager constructor")
     this.m_LayerIDWatermark = 0;
     this.m_CurrentLayerID = 0;
     this.m_CurrentElementID = 0;
